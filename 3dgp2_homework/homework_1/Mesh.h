@@ -50,19 +50,19 @@ protected:
 protected:
 	int								m_nVertices = 0;
 
-	XMFLOAT3						*m_pxmf3Positions = NULL;
+	XMFLOAT3						*m_pxmf3Positions = nullptr;
 
-	ID3D12Resource					*m_pd3dPositionBuffer = NULL;
-	ID3D12Resource					*m_pd3dPositionUploadBuffer = NULL;
+	ID3D12Resource					*m_pd3dPositionBuffer = nullptr;
+	ID3D12Resource					*m_pd3dPositionUploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
 
 	int								m_nSubMeshes = 0;
-	int								*m_pnSubSetIndices = NULL;
-	UINT							**m_ppnSubSetIndices = NULL;
+	int								*m_pnSubSetIndices = nullptr;
+	UINT							**m_ppnSubSetIndices = nullptr;
 
-	ID3D12Resource					**m_ppd3dSubSetIndexBuffers = NULL;
-	ID3D12Resource					**m_ppd3dSubSetIndexUploadBuffers = NULL;
-	D3D12_INDEX_BUFFER_VIEW			*m_pd3dSubSetIndexBufferViews = NULL;
+	ID3D12Resource					**m_ppd3dSubSetIndexBuffers = nullptr;
+	ID3D12Resource					**m_ppd3dSubSetIndexUploadBuffers = nullptr;
+	D3D12_INDEX_BUFFER_VIEW			*m_pd3dSubSetIndexBufferViews = nullptr;
 
 public:
 	UINT GetType() { return(m_nType); }
@@ -89,10 +89,10 @@ public:
 	virtual ~CTexturedRectMesh();
 
 protected:
-	XMFLOAT2						*m_pxmf2TextureCoords0 = NULL;
+	XMFLOAT2						*m_pxmf2TextureCoords0 = nullptr;
 
-	ID3D12Resource					*m_pd3dTextureCoord0Buffer = NULL;
-	ID3D12Resource					*m_pd3dTextureCoord0UploadBuffer = NULL;
+	ID3D12Resource					*m_pd3dTextureCoord0Buffer = nullptr;
+	ID3D12Resource					*m_pd3dTextureCoord0UploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dTextureCoord0BufferView;
 
 public:
@@ -109,31 +109,31 @@ public:
 	virtual ~CStandardMesh();
 
 protected:
-	XMFLOAT4						*m_pxmf4Colors = NULL;
-	XMFLOAT3						*m_pxmf3Normals = NULL;
-	XMFLOAT3						*m_pxmf3Tangents = NULL;
-	XMFLOAT3						*m_pxmf3BiTangents = NULL;
-	XMFLOAT2						*m_pxmf2TextureCoords0 = NULL;
-	XMFLOAT2						*m_pxmf2TextureCoords1 = NULL;
+	XMFLOAT4						*m_pxmf4Colors = nullptr;
+	XMFLOAT3						*m_pxmf3Normals = nullptr;
+	XMFLOAT3						*m_pxmf3Tangents = nullptr;
+	XMFLOAT3						*m_pxmf3BiTangents = nullptr;
+	XMFLOAT2						*m_pxmf2TextureCoords0 = nullptr;
+	XMFLOAT2						*m_pxmf2TextureCoords1 = nullptr;
 
-	ID3D12Resource					*m_pd3dTextureCoord0Buffer = NULL;
-	ID3D12Resource					*m_pd3dTextureCoord0UploadBuffer = NULL;
+	ID3D12Resource					*m_pd3dTextureCoord0Buffer = nullptr;
+	ID3D12Resource					*m_pd3dTextureCoord0UploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dTextureCoord0BufferView;
 
-	ID3D12Resource					*m_pd3dTextureCoord1Buffer = NULL;
-	ID3D12Resource					*m_pd3dTextureCoord1UploadBuffer = NULL;
+	ID3D12Resource					*m_pd3dTextureCoord1Buffer = nullptr;
+	ID3D12Resource					*m_pd3dTextureCoord1UploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dTextureCoord1BufferView;
 
-	ID3D12Resource					*m_pd3dNormalBuffer = NULL;
-	ID3D12Resource					*m_pd3dNormalUploadBuffer = NULL;
+	ID3D12Resource					*m_pd3dNormalBuffer = nullptr;
+	ID3D12Resource					*m_pd3dNormalUploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dNormalBufferView;
 
-	ID3D12Resource					*m_pd3dTangentBuffer = NULL;
-	ID3D12Resource					*m_pd3dTangentUploadBuffer = NULL;
+	ID3D12Resource					*m_pd3dTangentBuffer = nullptr;
+	ID3D12Resource					*m_pd3dTangentUploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dTangentBufferView;
 
-	ID3D12Resource					*m_pd3dBiTangentBuffer = NULL;
-	ID3D12Resource					*m_pd3dBiTangentUploadBuffer = NULL;
+	ID3D12Resource					*m_pd3dBiTangentBuffer = nullptr;
+	ID3D12Resource					*m_pd3dBiTangentUploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dBiTangentBufferView;
 
 public:
@@ -148,7 +148,7 @@ public:
 class CRawFormatImage
 {
 protected:
-	BYTE* m_pRawImagePixels = NULL;
+	BYTE* m_pRawImagePixels = nullptr;
 
 	int							m_nWidth;
 	int							m_nLength;
@@ -187,24 +187,24 @@ protected:
 	int							m_nLength;
 	XMFLOAT3					m_xmf3Scale;
 
-	XMFLOAT4*					m_pxmf4Colors = NULL;
-	XMFLOAT2*					m_pxmf2TextureCoords0 = NULL;
-	XMFLOAT2*					m_pxmf2TextureCoords1 = NULL;
+	XMFLOAT4*					m_pxmf4Colors = nullptr;
+	XMFLOAT2*					m_pxmf2TextureCoords0 = nullptr;
+	XMFLOAT2*					m_pxmf2TextureCoords1 = nullptr;
 
-	ID3D12Resource*				m_pd3dColorBuffer = NULL;
-	ID3D12Resource*				m_pd3dColorUploadBuffer = NULL;
+	ID3D12Resource*				m_pd3dColorBuffer = nullptr;
+	ID3D12Resource*				m_pd3dColorUploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW	m_d3dColorBufferView;
 
-	ID3D12Resource*				m_pd3dTextureCoord0Buffer = NULL;
-	ID3D12Resource*				m_pd3dTextureCoord0UploadBuffer = NULL;
+	ID3D12Resource*				m_pd3dTextureCoord0Buffer = nullptr;
+	ID3D12Resource*				m_pd3dTextureCoord0UploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW	m_d3dTextureCoord0BufferView;
 
-	ID3D12Resource*				m_pd3dTextureCoord1Buffer = NULL;
-	ID3D12Resource*				m_pd3dTextureCoord1UploadBuffer = NULL;
+	ID3D12Resource*				m_pd3dTextureCoord1Buffer = nullptr;
+	ID3D12Resource*				m_pd3dTextureCoord1UploadBuffer = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW	m_d3dTextureCoord1BufferView;
 
 public:
-	CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int nLength, XMFLOAT3 xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* pContext = NULL);
+	CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int nLength, XMFLOAT3 xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* pContext = nullptr);
 	virtual ~CHeightMapGridMesh();
 
 	virtual void ReleaseUploadBuffers();

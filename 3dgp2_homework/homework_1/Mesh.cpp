@@ -33,7 +33,7 @@ CMesh::~CMesh()
 void CMesh::ReleaseUploadBuffers()
 {
 	if (m_pd3dPositionUploadBuffer) m_pd3dPositionUploadBuffer->Release();
-	m_pd3dPositionUploadBuffer = NULL;
+	m_pd3dPositionUploadBuffer = nullptr;
 
 	if ((m_nSubMeshes > 0) && m_ppd3dSubSetIndexUploadBuffers)
 	{
@@ -42,7 +42,7 @@ void CMesh::ReleaseUploadBuffers()
 			if (m_ppd3dSubSetIndexUploadBuffers[i]) m_ppd3dSubSetIndexUploadBuffers[i]->Release();
 		}
 		if (m_ppd3dSubSetIndexUploadBuffers) delete[] m_ppd3dSubSetIndexUploadBuffers;
-		m_ppd3dSubSetIndexUploadBuffers = NULL;
+		m_ppd3dSubSetIndexUploadBuffers = nullptr;
 	}
 }
 
@@ -163,7 +163,7 @@ void CTexturedRectMesh::ReleaseUploadBuffers()
 	CMesh::ReleaseUploadBuffers();
 
 	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
-	m_pd3dTextureCoord0UploadBuffer = NULL;
+	m_pd3dTextureCoord0UploadBuffer = nullptr;
 }
 
 void CTexturedRectMesh::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
@@ -266,16 +266,16 @@ void CStandardMesh::ReleaseUploadBuffers()
 	CMesh::ReleaseUploadBuffers();
 
 	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
-	m_pd3dTextureCoord0UploadBuffer = NULL;
+	m_pd3dTextureCoord0UploadBuffer = nullptr;
 
 	if (m_pd3dNormalUploadBuffer) m_pd3dNormalUploadBuffer->Release();
-	m_pd3dNormalUploadBuffer = NULL;
+	m_pd3dNormalUploadBuffer = nullptr;
 
 	if (m_pd3dTangentUploadBuffer) m_pd3dTangentUploadBuffer->Release();
-	m_pd3dTangentUploadBuffer = NULL;
+	m_pd3dTangentUploadBuffer = nullptr;
 
 	if (m_pd3dBiTangentUploadBuffer) m_pd3dBiTangentUploadBuffer->Release();
-	m_pd3dBiTangentUploadBuffer = NULL;
+	m_pd3dBiTangentUploadBuffer = nullptr;
 }
 
 void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile)
@@ -477,9 +477,9 @@ CRawFormatImage::CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, boo
 
 	BYTE* pRawImagePixels = new BYTE[m_nWidth * m_nLength];
 
-	HANDLE hFile = ::CreateFile(pFileName, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY, NULL);
+	HANDLE hFile = ::CreateFile(pFileName, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY, nullptr);
 	DWORD dwBytesRead;
-	::ReadFile(hFile, pRawImagePixels, (m_nWidth * m_nLength), &dwBytesRead, NULL);
+	::ReadFile(hFile, pRawImagePixels, (m_nWidth * m_nLength), &dwBytesRead, nullptr);
 	::CloseHandle(hFile);
 
 	if (bFlipY)
@@ -504,7 +504,7 @@ CRawFormatImage::CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, boo
 CRawFormatImage::~CRawFormatImage()
 {
 	if (m_pRawImagePixels) delete[] m_pRawImagePixels;
-	m_pRawImagePixels = NULL;
+	m_pRawImagePixels = nullptr;
 }
 
 CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale) : CRawFormatImage(pFileName, nWidth, nLength, true)
@@ -684,11 +684,11 @@ void CHeightMapGridMesh::ReleaseUploadBuffers()
 	CMesh::ReleaseUploadBuffers();
 
 	if (m_pd3dColorUploadBuffer) m_pd3dColorUploadBuffer->Release();
-	m_pd3dColorUploadBuffer = NULL;
+	m_pd3dColorUploadBuffer = nullptr;
 	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
-	m_pd3dTextureCoord0UploadBuffer = NULL;
+	m_pd3dTextureCoord0UploadBuffer = nullptr;
 	if (m_pd3dTextureCoord1UploadBuffer) m_pd3dTextureCoord1UploadBuffer->Release();
-	m_pd3dTextureCoord1UploadBuffer = NULL;
+	m_pd3dTextureCoord1UploadBuffer = nullptr;
 }
 
 float CHeightMapGridMesh::OnGetHeight(int x, int z, void* pContext)

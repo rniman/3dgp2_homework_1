@@ -43,7 +43,7 @@ public:
 	CDescriptorHeap();
 	~CDescriptorHeap();
 
-	ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap = NULL;
+	ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap = nullptr;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE			m_d3dCbvCPUDescriptorStartHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE			m_d3dCbvGPUDescriptorStartHandle;
@@ -86,31 +86,31 @@ public:
 
 	bool ProcessInput(UCHAR *pKeysBuffer);
     void AnimateObjects(float fTimeElapsed);
-    void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
+    void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=nullptr);
 
 	void ReleaseUploadBuffers();
 
-	CPlayer								*m_pPlayer = NULL;
+	CPlayer								*m_pPlayer = nullptr;
 
 public:
-	ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
+	ID3D12RootSignature					*m_pd3dGraphicsRootSignature = nullptr;
 
 	int									m_nGameObjects = 0;
-	CGameObject							**m_ppGameObjects = NULL;
+	CGameObject							**m_ppGameObjects = nullptr;
 
 	int									m_nShaders = 0;
-	CShader								**m_ppShaders = NULL;
+	CShader								**m_ppShaders = nullptr;
 
-	CSkyBox								*m_pSkyBox = NULL;
-	CHeightMapTerrain*					m_pTerrain = NULL;
+	CSkyBox								*m_pSkyBox = nullptr;
+	CHeightMapTerrain*					m_pTerrain = nullptr;
 
-	LIGHT								*m_pLights = NULL;
+	LIGHT								*m_pLights = nullptr;
 	int									m_nLights = 0;
 
 	XMFLOAT4							m_xmf4GlobalAmbient;
 
-	ID3D12Resource						*m_pd3dcbLights = NULL;
-	LIGHTS								*m_pcbMappedLights = NULL;
+	ID3D12Resource						*m_pd3dcbLights = nullptr;
+	LIGHTS								*m_pcbMappedLights = nullptr;
 
 public:
 	static CDescriptorHeap*				m_pDescriptorHeap;
