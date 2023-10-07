@@ -135,7 +135,7 @@ void CCamera::ReleaseShaderVariables()
 	if (m_pd3dcbCamera)
 	{
 		m_pd3dcbCamera->Unmap(0, nullptr);
-		m_pd3dcbCamera->Release();
+		m_pd3dcbCamera.ReleaseAndGetAddressOf();
 	}
 }
 

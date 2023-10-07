@@ -17,33 +17,6 @@ class CPlayer;
 
 class CCamera
 {
-protected:
-	XMFLOAT3						m_xmf3Position;
-	XMFLOAT3						m_xmf3Right;
-	XMFLOAT3						m_xmf3Up;
-	XMFLOAT3						m_xmf3Look;
-
-	float           				m_fPitch;
-	float           				m_fRoll;
-	float           				m_fYaw;
-
-	DWORD							m_nMode;
-
-	XMFLOAT3						m_xmf3LookAtWorld;
-	XMFLOAT3						m_xmf3Offset;
-	float           				m_fTimeLag;
-
-	XMFLOAT4X4						m_xmf4x4View;
-	XMFLOAT4X4						m_xmf4x4Projection;
-
-	D3D12_VIEWPORT					m_d3dViewport;
-	D3D12_RECT						m_d3dScissorRect;
-
-	CPlayer							*m_pPlayer = nullptr;
-
-	ID3D12Resource					*m_pd3dcbCamera = nullptr;
-	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = nullptr;
-
 public:
 	CCamera();
 	CCamera(CCamera *pCamera);
@@ -100,6 +73,34 @@ public:
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed) { }
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt) { }
+
+protected:
+	XMFLOAT3						m_xmf3Position;
+	XMFLOAT3						m_xmf3Right;
+	XMFLOAT3						m_xmf3Up;
+	XMFLOAT3						m_xmf3Look;
+
+	float           				m_fPitch;
+	float           				m_fRoll;
+	float           				m_fYaw;
+
+	DWORD							m_nMode;
+
+	XMFLOAT3						m_xmf3LookAtWorld;
+	XMFLOAT3						m_xmf3Offset;
+	float           				m_fTimeLag;
+
+	XMFLOAT4X4						m_xmf4x4View;
+	XMFLOAT4X4						m_xmf4x4Projection;
+
+	D3D12_VIEWPORT					m_d3dViewport;
+	D3D12_RECT						m_d3dScissorRect;
+
+	CPlayer*						m_pPlayer = nullptr;
+
+	ComPtr<ID3D12Resource>			m_pd3dcbCamera;
+	VS_CB_CAMERA_INFO*				m_pcbMappedCamera = nullptr;
+
 };
 
 class CSpaceShipCamera : public CCamera
