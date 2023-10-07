@@ -16,9 +16,17 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	m_nTextures = nTextures;
 	if (m_nTextures > 0)
 	{
-		m_ppd3dTextureUploadBuffers = new ID3D12Resource * [m_nTextures];
-		m_ppd3dTextures = new ID3D12Resource * [m_nTextures];
-		for (int i = 0; i < m_nTextures; i++) m_ppd3dTextureUploadBuffers[i] = m_ppd3dTextures[i] = nullptr;
+		//m_ppd3dTextureUploadBuffers = new ID3D12Resource * [m_nTextures];
+		m_ppd3dTextureUploadBuffers.reserve(m_nTextures);
+
+		//m_ppd3dTextures = new ID3D12Resource * [m_nTextures];
+		m_ppd3dTextures.reserve(m_nTextures);
+		
+		for (int i = 0; i < m_nTextures; i++)
+		{
+			m_ppd3dTextureUploadBuffers.emplace_back(ComPtr<ID3D12Resource>());
+			m_ppd3dTextures.emplace_back(ComPtr<ID3D12Resource>());
+		}
 
 		m_ppstrTextureNames = new _TCHAR[m_nTextures][64];
 		for (int i = 0; i < m_nTextures; i++) m_ppstrTextureNames[i][0] = '\0';
@@ -40,10 +48,17 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 
 CTexture::~CTexture()
 {
-	if (m_ppd3dTextures)
+	if (m_nTextures > 0)
 	{
-		for (int i = 0; i < m_nTextures; i++) if (m_ppd3dTextures[i]) m_ppd3dTextures[i]->Release();
-		delete[] m_ppd3dTextures;
+		for (int i = 0; i < m_nTextures; i++) 
+		{
+			if (m_ppd3dTextures[i].Get()) 
+			{
+				m_ppd3dTextures[i].ReleaseAndGetAddressOf();
+			}
+		}
+		
+		//delete[] m_ppd3dTextures;
 	}
 
 	if (m_ppstrTextureNames) delete[] m_ppstrTextureNames;
@@ -99,11 +114,18 @@ void CTexture::ReleaseShaderVariables()
 
 void CTexture::ReleaseUploadBuffers()
 {
-	if (m_ppd3dTextureUploadBuffers)
+	if (m_nTextures > 0)
 	{
-		for (int i = 0; i < m_nTextures; i++) if (m_ppd3dTextureUploadBuffers[i]) m_ppd3dTextureUploadBuffers[i]->Release();
-		delete[] m_ppd3dTextureUploadBuffers;
-		m_ppd3dTextureUploadBuffers = nullptr;
+		for (int i = 0; i < m_nTextures; i++) 
+		{
+			if (m_ppd3dTextureUploadBuffers[i].Get()) 
+			{
+				m_ppd3dTextureUploadBuffers[i].ReleaseAndGetAddressOf();
+			}
+		}
+
+		//delete[] m_ppd3dTextureUploadBuffers;
+		//m_ppd3dTextureUploadBuffers = nullptr;
 	}
 }
 
@@ -125,7 +147,7 @@ ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, ID3D12Graphics
 {
 	m_pnResourceTypes[nIndex] = nResourceType;
 	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, pd3dCommandList, nWidth, nHeight, nElements, nMipLevels, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
-	return(m_ppd3dTextures[nIndex]);
+	return(m_ppd3dTextures[nIndex].Get());
 }
 
 int CTexture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, CShader* pShader, UINT nIndex)

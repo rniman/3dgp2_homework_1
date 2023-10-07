@@ -56,6 +56,11 @@ using Microsoft::WRL::ComPtr;
 
 #pragma comment(lib, "dxguid.lib")
 
+// 편하게 쓰기 위해
+
+using VectorComptrResource = std::vector<ComPtr<ID3D12Resource>>;
+
+
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 extern UINT gnCbvSrvDescriptorIncrementSize;
