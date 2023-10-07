@@ -48,19 +48,6 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 
 CTexture::~CTexture()
 {
-	if (m_nTextures > 0)
-	{
-		for (int i = 0; i < m_nTextures; i++) 
-		{
-			if (m_ppd3dTextures[i].Get()) 
-			{
-				m_ppd3dTextures[i].ReleaseAndGetAddressOf();
-			}
-		}
-		
-		//delete[] m_ppd3dTextures;
-	}
-
 	if (m_ppstrTextureNames) delete[] m_ppstrTextureNames;
 
 	if (m_pnResourceTypes) delete[] m_pnResourceTypes;

@@ -43,7 +43,7 @@ public:
 	CDescriptorHeap();
 	~CDescriptorHeap();
 
-	ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap = nullptr;
+	ComPtr<ID3D12DescriptorHeap> m_pd3dCbvSrvDescriptorHeap;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE			m_d3dCbvCPUDescriptorStartHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE			m_d3dCbvGPUDescriptorStartHandle;
@@ -82,7 +82,7 @@ public:
 	void ReleaseObjects();
 
 	ID3D12RootSignature *CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
-	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
+	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature.Get()); }
 
 	bool ProcessInput(UCHAR *pKeysBuffer);
     void AnimateObjects(float fTimeElapsed);
@@ -90,30 +90,8 @@ public:
 
 	void ReleaseUploadBuffers();
 
-	CPlayer								*m_pPlayer = nullptr;
-
-public:
-	ID3D12RootSignature					*m_pd3dGraphicsRootSignature = nullptr;
-
-	int									m_nGameObjects = 0;
-	CGameObject							**m_ppGameObjects = nullptr;
-
-	int									m_nShaders = 0;
-	CShader								**m_ppShaders = nullptr;
-
-	CSkyBox								*m_pSkyBox = nullptr;
-	CHeightMapTerrain*					m_pTerrain = nullptr;
-
-	LIGHT								*m_pLights = nullptr;
-	int									m_nLights = 0;
-
-	XMFLOAT4							m_xmf4GlobalAmbient;
-
-	ID3D12Resource						*m_pd3dcbLights = nullptr;
-	LIGHTS								*m_pcbMappedLights = nullptr;
-
-public:
-	static CDescriptorHeap*				m_pDescriptorHeap;
+	// descriptor heap
+	static CDescriptorHeap* m_pDescriptorHeap;
 
 	static void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
 	static void CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
@@ -131,4 +109,25 @@ public:
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUCbvDescriptorNextHandle() { return(m_pDescriptorHeap->m_d3dCbvGPUDescriptorNextHandle); }
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSrvDescriptorStartHandle() { return(m_pDescriptorHeap->m_d3dSrvCPUDescriptorStartHandle); }
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorStartHandle() { return(m_pDescriptorHeap->m_d3dSrvGPUDescriptorStartHandle); }
+
+	ComPtr<ID3D12RootSignature>			m_pd3dGraphicsRootSignature;
+
+	CPlayer*							m_pPlayer = nullptr;
+
+	int									m_nGameObjects = 0;
+	CGameObject**						m_ppGameObjects = nullptr;
+
+	int									m_nShaders = 0;
+	CShader**							m_ppShaders = nullptr;
+
+	CSkyBox*							m_pSkyBox = nullptr;
+	CHeightMapTerrain*					m_pTerrain = nullptr;
+
+	LIGHT*								m_pLights = nullptr;
+	int									m_nLights = 0;
+
+	XMFLOAT4							m_xmf4GlobalAmbient;
+
+	ComPtr<ID3D12Resource>				m_pd3dcbLights;
+	LIGHTS*								m_pcbMappedLights = nullptr;
 };

@@ -12,29 +12,6 @@
 
 class CPlayer : public CGameObject
 {
-protected:
-	XMFLOAT3					m_xmf3Position;
-	XMFLOAT3					m_xmf3Right;
-	XMFLOAT3					m_xmf3Up;
-	XMFLOAT3					m_xmf3Look;
-
-	float           			m_fPitch;
-	float           			m_fYaw;
-	float           			m_fRoll;
-
-	XMFLOAT3					m_xmf3Velocity;
-	XMFLOAT3     				m_xmf3Gravity;
-	float           			m_fMaxVelocityXZ;
-	float           			m_fMaxVelocityY;
-	float           			m_fFriction;
-
-	LPVOID						m_pPlayerUpdatedContext;
-	LPVOID						m_pCameraUpdatedContext;
-
-	CCamera						*m_pCamera = nullptr;
-
-	CShader						*m_pShader = nullptr;
-
 public:
 	CPlayer();
 	virtual ~CPlayer();
@@ -81,6 +58,29 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(nullptr); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = nullptr);
+
+protected:
+	XMFLOAT3	m_xmf3Position;
+	XMFLOAT3	m_xmf3Right;
+	XMFLOAT3	m_xmf3Up;
+	XMFLOAT3	m_xmf3Look;
+
+	float       m_fPitch;
+	float       m_fYaw;
+	float       m_fRoll;
+
+	XMFLOAT3	m_xmf3Velocity;
+	XMFLOAT3    m_xmf3Gravity;
+	float       m_fMaxVelocityXZ;
+	float       m_fMaxVelocityY;
+	float       m_fFriction;
+	
+	LPVOID		m_pPlayerUpdatedContext;
+	LPVOID		m_pCameraUpdatedContext;
+
+	CCamera*	m_pCamera = nullptr;
+
+	CShader*	m_pShader = nullptr;
 };
 
 class CAirplanePlayer : public CPlayer
@@ -89,16 +89,16 @@ public:
 	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CAirplanePlayer();
 
-	CGameObject					*m_pMainRotorFrame = nullptr;
-	CGameObject					*m_pTailRotorFrame = nullptr;
-
-private:
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = nullptr);
 
-public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
+
+private:
+	CGameObject* m_pMainRotorFrame = nullptr;
+	CGameObject* m_pTailRotorFrame = nullptr;
+
 };
 
 
