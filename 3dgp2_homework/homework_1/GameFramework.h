@@ -69,22 +69,22 @@ private:
 	ComPtr<ID3D12CommandQueue>			m_pd3dCommandQueue;
 	ComPtr<ID3D12GraphicsCommandList>	m_pd3dCommandList;
 
-	ComPtr<ID3D12Fence>			m_pd3dFence;
-	UINT64						m_nFenceValues[m_nSwapChainBuffers];
-	HANDLE						m_hFenceEvent;
+	ComPtr<ID3D12Fence>				m_pd3dFence;
+	UINT64							m_nFenceValues[m_nSwapChainBuffers];
+	HANDLE							m_hFenceEvent;
 
 #if defined(_DEBUG)
-	ID3D12Debug					*m_pd3dDebugController;
+	ID3D12Debug						*m_pd3dDebugController;
 #endif
 
-	CGameTimer					m_GameTimer;
+	CGameTimer						m_GameTimer;
 
-	CScene						*m_pScene = nullptr;
-	CPlayer						*m_pPlayer = nullptr;
-	CCamera						*m_pCamera = nullptr;
+	CScene							*m_pScene = nullptr;
+	CPlayer							*m_pPlayer = nullptr;
+	CCamera							*m_pCamera = nullptr;
 
-	POINT						m_ptOldCursorPos;
+	POINT							m_ptOldCursorPos;
 
-	_TCHAR						m_pszFrameRate[70];
+	_TCHAR							m_pszFrameRate[70];
 };
 

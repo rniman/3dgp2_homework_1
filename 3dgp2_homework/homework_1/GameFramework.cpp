@@ -368,10 +368,6 @@ void CGameFramework::OnDestroy()
 
 	::CloseHandle(m_hFenceEvent);
 
-	//if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
-
-	//for (int i = 0; i < m_nSwapChainBuffers; i++) if (m_ppd3dSwapChainBackBuffers[i]) m_ppd3dSwapChainBackBuffers[i]->Release();
-
 	m_pdxgiSwapChain->SetFullscreenState(FALSE, nullptr);
 
 #if defined(_DEBUG)

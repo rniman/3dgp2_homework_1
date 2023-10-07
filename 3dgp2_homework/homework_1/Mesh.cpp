@@ -11,17 +11,18 @@ CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandLis
 
 CMesh::~CMesh()
 {
-	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
+	//if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
 
 	if (m_nSubMeshes > 0)
 	{
 		for (int i = 0; i < m_nSubMeshes; i++)
 		{
-			if (m_ppd3dSubSetIndexBuffers[i]) m_ppd3dSubSetIndexBuffers[i]->Release();
+			//if (m_ppd3dSubSetIndexBuffers[i]) m_ppd3dSubSetIndexBuffers[i]->Release();
 			if (m_ppnSubSetIndices[i]) delete[] m_ppnSubSetIndices[i];
 		}
-		if (m_ppd3dSubSetIndexBuffers) delete[] m_ppd3dSubSetIndexBuffers;
-		if (m_pd3dSubSetIndexBufferViews) delete[] m_pd3dSubSetIndexBufferViews;
+
+		//if (m_ppd3dSubSetIndexBuffers) delete[] m_ppd3dSubSetIndexBuffers;
+		//if (m_pd3dSubSetIndexBufferViews) delete[] m_pd3dSubSetIndexBufferViews;
 
 		if (m_pnSubSetIndices) delete[] m_pnSubSetIndices;
 		if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
@@ -32,17 +33,24 @@ CMesh::~CMesh()
 
 void CMesh::ReleaseUploadBuffers()
 {
-	if (m_pd3dPositionUploadBuffer) m_pd3dPositionUploadBuffer->Release();
-	m_pd3dPositionUploadBuffer = nullptr;
+	if (m_pd3dPositionUploadBuffer.Get()) 
+	{
+		m_pd3dPositionUploadBuffer.ReleaseAndGetAddressOf();
+	}
+	//m_pd3dPositionUploadBuffer = nullptr;
 
-	if ((m_nSubMeshes > 0) && m_ppd3dSubSetIndexUploadBuffers)
+	if ((m_nSubMeshes > 0))
 	{
 		for (int i = 0; i < m_nSubMeshes; i++)
 		{
-			if (m_ppd3dSubSetIndexUploadBuffers[i]) m_ppd3dSubSetIndexUploadBuffers[i]->Release();
+			if (m_ppd3dSubSetIndexUploadBuffers[i].Get())
+			{
+				m_ppd3dSubSetIndexUploadBuffers[i].ReleaseAndGetAddressOf();
+			}
 		}
-		if (m_ppd3dSubSetIndexUploadBuffers) delete[] m_ppd3dSubSetIndexUploadBuffers;
-		m_ppd3dSubSetIndexUploadBuffers = nullptr;
+		
+		//if (m_ppd3dSubSetIndexUploadBuffers) delete[] m_ppd3dSubSetIndexUploadBuffers;
+		//m_ppd3dSubSetIndexUploadBuffers = nullptr;
 	}
 }
 
@@ -154,7 +162,6 @@ CTexturedRectMesh::CTexturedRectMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 
 CTexturedRectMesh::~CTexturedRectMesh()
 {
-	if (m_pd3dTextureCoord0Buffer) m_pd3dTextureCoord0Buffer->Release();
 	if (m_pxmf2TextureCoords0) delete[] m_pxmf2TextureCoords0;
 }
 
@@ -162,8 +169,7 @@ void CTexturedRectMesh::ReleaseUploadBuffers()
 {
 	CMesh::ReleaseUploadBuffers();
 
-	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
-	m_pd3dTextureCoord0UploadBuffer = nullptr;
+	if (m_pd3dTextureCoord0UploadBuffer.Get()) m_pd3dTextureCoord0UploadBuffer.ReleaseAndGetAddressOf();
 }
 
 void CTexturedRectMesh::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
@@ -248,11 +254,6 @@ CStandardMesh::CStandardMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 
 CStandardMesh::~CStandardMesh()
 {
-	if (m_pd3dTextureCoord0Buffer) m_pd3dTextureCoord0Buffer->Release();
-	if (m_pd3dNormalBuffer) m_pd3dNormalBuffer->Release();
-	if (m_pd3dTangentBuffer) m_pd3dTangentBuffer->Release();
-	if (m_pd3dBiTangentBuffer) m_pd3dBiTangentBuffer->Release();
-
 	if (m_pxmf4Colors) delete[] m_pxmf4Colors;
 	if (m_pxmf3Normals) delete[] m_pxmf3Normals;
 	if (m_pxmf3Tangents) delete[] m_pxmf3Tangents;
@@ -265,17 +266,13 @@ void CStandardMesh::ReleaseUploadBuffers()
 {
 	CMesh::ReleaseUploadBuffers();
 
-	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
-	m_pd3dTextureCoord0UploadBuffer = nullptr;
+	if (m_pd3dTextureCoord0UploadBuffer.Get()) m_pd3dTextureCoord0UploadBuffer.ReleaseAndGetAddressOf();
 
-	if (m_pd3dNormalUploadBuffer) m_pd3dNormalUploadBuffer->Release();
-	m_pd3dNormalUploadBuffer = nullptr;
+	if (m_pd3dNormalUploadBuffer.Get()) m_pd3dNormalUploadBuffer.ReleaseAndGetAddressOf();
 
-	if (m_pd3dTangentUploadBuffer) m_pd3dTangentUploadBuffer->Release();
-	m_pd3dTangentUploadBuffer = nullptr;
+	if (m_pd3dTangentUploadBuffer.Get()) m_pd3dTangentUploadBuffer.ReleaseAndGetAddressOf();
 
-	if (m_pd3dBiTangentUploadBuffer) m_pd3dBiTangentUploadBuffer->Release();
-	m_pd3dBiTangentUploadBuffer = nullptr;
+	if (m_pd3dBiTangentUploadBuffer.Get()) m_pd3dBiTangentUploadBuffer.ReleaseAndGetAddressOf();
 }
 
 void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile)
@@ -414,9 +411,21 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 				m_pnSubSetIndices = new int[m_nSubMeshes];
 				m_ppnSubSetIndices = new UINT*[m_nSubMeshes];
 
-				m_ppd3dSubSetIndexBuffers = new ID3D12Resource*[m_nSubMeshes];
-				m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource*[m_nSubMeshes];
-				m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
+				m_ppd3dSubSetIndexBuffers.reserve(m_nSubMeshes);
+				//m_ppd3dSubSetIndexBuffers = new ID3D12Resource*[m_nSubMeshes];
+				
+				m_ppd3dSubSetIndexUploadBuffers.reserve(m_nSubMeshes);
+				//m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource*[m_nSubMeshes];
+				
+				m_pd3dSubSetIndexBufferViews.reserve(m_nSubMeshes);
+				//m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
+
+				for (int i = 0; i < m_nSubMeshes; ++i)
+				{
+					m_ppd3dSubSetIndexBuffers.emplace_back(ComPtr<ID3D12Resource>());
+					m_ppd3dSubSetIndexUploadBuffers.emplace_back(ComPtr<ID3D12Resource>());
+					m_pd3dSubSetIndexBufferViews.emplace_back(D3D12_INDEX_BUFFER_VIEW());
+				}
 
 				for (int i = 0; i < m_nSubMeshes; i++)
 				{
@@ -632,9 +641,19 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_pnSubSetIndices = new int[m_nSubMeshes];
 	m_ppnSubSetIndices = new UINT * [m_nSubMeshes];
 
-	m_ppd3dSubSetIndexBuffers = new ID3D12Resource * [m_nSubMeshes];
-	m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource * [m_nSubMeshes];
-	m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
+	m_ppd3dSubSetIndexBuffers.reserve(m_nSubMeshes);
+	//m_ppd3dSubSetIndexBuffers = new ID3D12Resource*[m_nSubMeshes];
+
+	m_ppd3dSubSetIndexUploadBuffers.reserve(m_nSubMeshes);
+	//m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource*[m_nSubMeshes];
+
+	m_pd3dSubSetIndexBufferViews.reserve(m_nSubMeshes);
+	m_pd3dSubSetIndexBufferViews.emplace_back(D3D12_INDEX_BUFFER_VIEW());
+	//m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
+
+	m_ppd3dSubSetIndexBuffers.emplace_back(ComPtr<ID3D12Resource>());
+	m_ppd3dSubSetIndexUploadBuffers.emplace_back(ComPtr<ID3D12Resource>());
+
 
 	m_pnSubSetIndices[0] = ((nWidth * 2) * (nLength - 1)) + ((nLength - 1) - 1);
 	m_ppnSubSetIndices[0] = new UINT[m_pnSubSetIndices[0]];
@@ -670,10 +689,6 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 CHeightMapGridMesh::~CHeightMapGridMesh()
 {
-	if (m_pd3dTextureCoord0Buffer) m_pd3dTextureCoord0Buffer->Release();
-	if (m_pd3dTextureCoord1Buffer) m_pd3dTextureCoord1Buffer->Release();
-	if (m_pd3dColorBuffer) m_pd3dColorBuffer->Release();
-
 	if (m_pxmf4Colors) delete[] m_pxmf4Colors;
 	if (m_pxmf2TextureCoords0) delete[] m_pxmf2TextureCoords0;
 	if (m_pxmf2TextureCoords1) delete[] m_pxmf2TextureCoords1;
@@ -683,12 +698,12 @@ void CHeightMapGridMesh::ReleaseUploadBuffers()
 {
 	CMesh::ReleaseUploadBuffers();
 
-	if (m_pd3dColorUploadBuffer) m_pd3dColorUploadBuffer->Release();
-	m_pd3dColorUploadBuffer = nullptr;
-	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
-	m_pd3dTextureCoord0UploadBuffer = nullptr;
-	if (m_pd3dTextureCoord1UploadBuffer) m_pd3dTextureCoord1UploadBuffer->Release();
-	m_pd3dTextureCoord1UploadBuffer = nullptr;
+	if (m_pd3dColorUploadBuffer.Get()) m_pd3dColorUploadBuffer.ReleaseAndGetAddressOf();
+	
+	if (m_pd3dTextureCoord0UploadBuffer.Get()) m_pd3dTextureCoord0UploadBuffer.ReleaseAndGetAddressOf();
+
+	if (m_pd3dTextureCoord1UploadBuffer.Get()) m_pd3dTextureCoord1UploadBuffer.ReleaseAndGetAddressOf();
+
 }
 
 float CHeightMapGridMesh::OnGetHeight(int x, int z, void* pContext)
