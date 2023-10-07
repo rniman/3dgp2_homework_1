@@ -12,12 +12,6 @@ CShader::CShader()
 CShader::~CShader()
 {
 	ReleaseShaderVariables();
-
-	if (m_ppd3dPipelineStates)
-	{
-		for (int i = 0; i < m_nPipelineStates; i++) if (m_ppd3dPipelineStates[i]) m_ppd3dPipelineStates[i]->Release();
-		delete[] m_ppd3dPipelineStates;
-	}
 }
 
 D3D12_SHADER_BYTECODE CShader::CreateVertexShader()
@@ -203,7 +197,10 @@ void CShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *
 
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState)
 {
-	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+	if (m_ppd3dPipelineStates[nPipelineState].Get())
+	{
+		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState].Get());
+	}
 }
 
 void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState)
@@ -269,7 +266,12 @@ D3D12_SHADER_BYTECODE CSkyBoxShader::CreatePixelShader()
 void CSkyBoxShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
+	m_ppd3dPipelineStates.reserve(m_nPipelineStates);
+
+	for (int i = 0; i < m_nPipelineStates; ++i)
+	{
+		m_ppd3dPipelineStates.emplace_back(ComPtr<ID3D12PipelineState>());
+	}
 
 	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
@@ -320,7 +322,12 @@ D3D12_SHADER_BYTECODE CStandardShader::CreatePixelShader()
 void CStandardShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
+	m_ppd3dPipelineStates.reserve(m_nPipelineStates);
+
+	for (int i = 0; i < m_nPipelineStates; ++i)
+	{
+		m_ppd3dPipelineStates.emplace_back(ComPtr<ID3D12PipelineState>());
+	}
 
 	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
@@ -500,7 +507,12 @@ D3D12_SHADER_BYTECODE CPlayerShader::CreatePixelShader()
 void CPlayerShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
+	m_ppd3dPipelineStates.reserve(m_nPipelineStates);
+
+	for (int i = 0; i < m_nPipelineStates; ++i)
+	{
+		m_ppd3dPipelineStates.emplace_back(ComPtr<ID3D12PipelineState>());
+	}
 
 	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
@@ -550,7 +562,12 @@ D3D12_SHADER_BYTECODE CTerrainShader::CreatePixelShader()
 void CTerrainShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+	m_ppd3dPipelineStates.reserve(m_nPipelineStates);
+
+	for (int i = 0; i < m_nPipelineStates; ++i)
+	{
+		m_ppd3dPipelineStates.emplace_back(ComPtr<ID3D12PipelineState>());
+	}
 
 	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
