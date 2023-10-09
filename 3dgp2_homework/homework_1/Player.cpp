@@ -241,9 +241,9 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CAirplanePlayer
 
-CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
+CHelicopterPlayer::CHelicopterPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
-	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 0.0f);
+	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
 	m_pShader = new CPlayerShader();
 	m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -256,17 +256,17 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-CAirplanePlayer::~CAirplanePlayer()
+CHelicopterPlayer::~CHelicopterPlayer()
 {
 }
 
-void CAirplanePlayer::PrepareAnimate()
+void CHelicopterPlayer::PrepareAnimate()
 {
 	m_pMainRotorFrame = FindFrame("Top_Rotor");
 	m_pTailRotorFrame = FindFrame("Tail_Rotor");
 }
 
-void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
+void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
 {
 	if (m_pMainRotorFrame)
 	{
@@ -282,12 +282,12 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
-void CAirplanePlayer::OnPrepareRender()
+void CHelicopterPlayer::OnPrepareRender()
 {
 	CPlayer::OnPrepareRender();
 }
 
-CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
+CCamera *CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
 	if (nCurrentCameraMode == nNewCameraMode) return(m_pCamera);

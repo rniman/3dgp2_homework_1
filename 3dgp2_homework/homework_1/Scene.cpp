@@ -252,75 +252,75 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
-	pd3dDescriptorRanges[0].BaseShaderRegister = 6; //t6: gtxtAlbedoTexture
+	pd3dDescriptorRanges[0].BaseShaderRegister = 0; //t6: gtxtAlbedoTexture
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[1].NumDescriptors = 1;
-	pd3dDescriptorRanges[1].BaseShaderRegister = 7; //t7: gtxtSpecularTexture
+	pd3dDescriptorRanges[1].BaseShaderRegister = 1; //t7: gtxtSpecularTexture
 	pd3dDescriptorRanges[1].RegisterSpace = 0;
 	pd3dDescriptorRanges[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[2].NumDescriptors = 1;
-	pd3dDescriptorRanges[2].BaseShaderRegister = 8; //t8: gtxtNormalTexture
+	pd3dDescriptorRanges[2].BaseShaderRegister = 2; //t8: gtxtNormalTexture
 	pd3dDescriptorRanges[2].RegisterSpace = 0;
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[3].NumDescriptors = 1;
-	pd3dDescriptorRanges[3].BaseShaderRegister = 9; //t9: gtxtMetallicTexture
+	pd3dDescriptorRanges[3].BaseShaderRegister = 3; //t9: gtxtMetallicTexture
 	pd3dDescriptorRanges[3].RegisterSpace = 0;
 	pd3dDescriptorRanges[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[4].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[4].NumDescriptors = 1;
-	pd3dDescriptorRanges[4].BaseShaderRegister = 10; //t10: gtxtEmissionTexture
+	pd3dDescriptorRanges[4].BaseShaderRegister = 4; //t10: gtxtEmissionTexture
 	pd3dDescriptorRanges[4].RegisterSpace = 0;
 	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[5].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[5].NumDescriptors = 1;
-	pd3dDescriptorRanges[5].BaseShaderRegister = 11; //t11: gtxtDetailAlbedoTexture
+	pd3dDescriptorRanges[5].BaseShaderRegister = 5; //t11: gtxtDetailAlbedoTexture
 	pd3dDescriptorRanges[5].RegisterSpace = 0;
 	pd3dDescriptorRanges[5].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[6].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[6].NumDescriptors = 1;
-	pd3dDescriptorRanges[6].BaseShaderRegister = 12; //t12: gtxtDetailNormalTexture
+	pd3dDescriptorRanges[6].BaseShaderRegister = 6; //t12: gtxtDetailNormalTexture
 	pd3dDescriptorRanges[6].RegisterSpace = 0;
 	pd3dDescriptorRanges[6].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[7].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[7].NumDescriptors = 1;
-	pd3dDescriptorRanges[7].BaseShaderRegister = 13; //t13: gtxtSkyBoxTexture
+	pd3dDescriptorRanges[7].BaseShaderRegister = 7; //t13: gtxtSkyBoxTexture
 	pd3dDescriptorRanges[7].RegisterSpace = 0;
 	pd3dDescriptorRanges[7].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[8].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[8].NumDescriptors = 3;
-	pd3dDescriptorRanges[8].BaseShaderRegister = 14; //t14~16: gtxtTerrainTexture
+	pd3dDescriptorRanges[8].BaseShaderRegister = 8; //t14~16: gtxtTerrainTexture
 	pd3dDescriptorRanges[8].RegisterSpace = 0;
 	pd3dDescriptorRanges[8].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[12];
 
-	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
-	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].Constants.Num32BitValues = 33;
-	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
-	pd3dRootParameters[1].Constants.RegisterSpace = 0;
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[1].Descriptor.ShaderRegister = 1; //Camera
+	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[2].Descriptor.ShaderRegister = 4; //Lights
-	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	pd3dRootParameters[2].Constants.Num32BitValues = 33;
+	pd3dRootParameters[2].Constants.ShaderRegister = 2; //GameObject
+	pd3dRootParameters[2].Constants.RegisterSpace = 0;
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[0].Descriptor.ShaderRegister = 4; //Lights
+	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
@@ -427,6 +427,9 @@ void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHT) * m_nLights);
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dcbLightsGpuVirtualAddress); //Lights
 }
 
 void CScene::ReleaseShaderVariables()
@@ -500,9 +503,6 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	UpdateShaderVariables(pd3dCommandList);
-
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);

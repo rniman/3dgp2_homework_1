@@ -387,7 +387,7 @@ void CGameFramework::BuildObjects()
 	m_pScene = new CScene();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	CAirplanePlayer *pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature());
+	CHelicopterPlayer *pAirplanePlayer = new CHelicopterPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature());
 	pAirplanePlayer->SetPosition(XMFLOAT3(920.0f, 745.0f, 1270.0));
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	m_pCamera = m_pPlayer->GetCamera();

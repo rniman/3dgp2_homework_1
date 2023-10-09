@@ -81,12 +81,18 @@ void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 	{
 		for (int i = 0; i < m_nRootParameters; i++)
 		{
-			if (m_pd3dSrvGpuDescriptorHandles[i].ptr && (m_pnRootParameterIndices[i] != -1)) pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], m_pd3dSrvGpuDescriptorHandles[i]);
+			if (m_pd3dSrvGpuDescriptorHandles[i].ptr && (m_pnRootParameterIndices[i] != -1))
+			{
+				pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], m_pd3dSrvGpuDescriptorHandles[i]);
+			}
 		}
 	}
 	else
 	{
-		if (m_pd3dSrvGpuDescriptorHandles[0].ptr) pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
+		if (m_pd3dSrvGpuDescriptorHandles[0].ptr)
+		{
+			pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
+		}
 	}
 }
 
@@ -280,12 +286,12 @@ void CMaterial::ReleaseUploadBuffers()
 
 void CMaterial::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4AmbientColor, 16);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4AlbedoColor, 20);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4SpecularColor, 24);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4EmissiveColor, 28);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 4, &m_xmf4AmbientColor, 16);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 4, &m_xmf4AlbedoColor, 20);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 4, &m_xmf4SpecularColor, 24);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 4, &m_xmf4EmissiveColor, 28);
 
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nType, 32);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_nType, 32);
 
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
 }
@@ -412,14 +418,28 @@ CGameObject *CGameObject::FindFrame(char *pstrFrameName)
 	CGameObject *pFrameObject = nullptr;
 	if (!strncmp(m_pstrFrameName, pstrFrameName, strlen(pstrFrameName))) return(this);
 
-	if (m_pSibling) if (pFrameObject = m_pSibling->FindFrame(pstrFrameName)) return(pFrameObject);
-	if (m_pChild) if (pFrameObject = m_pChild->FindFrame(pstrFrameName)) return(pFrameObject);
+	if (m_pSibling)
+	{
+		if (pFrameObject = m_pSibling->FindFrame(pstrFrameName))
+		{
+			return(pFrameObject);
+		}
+	}
+
+	if (m_pChild)
+	{
+		if (pFrameObject = m_pChild->FindFrame(pstrFrameName)) 
+		{
+			return(pFrameObject);
+		}
+	}
 
 	return(nullptr);
 }
 
 void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	// 하는거 없는 상태
 	OnPrepareRender();
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
@@ -473,7 +493,7 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandLis
 {
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 16, &xmf4x4World, 0);
 }
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial)

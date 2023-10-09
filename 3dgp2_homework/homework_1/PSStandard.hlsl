@@ -43,13 +43,21 @@ cbuffer cbGameObjectInfo : register(b2)
 SamplerState gssWrap : register(s0);
 
 // srv
-Texture2D gtxtAlbedoTexture : register(t6);
-Texture2D gtxtSpecularTexture : register(t7);
-Texture2D gtxtNormalTexture : register(t8);
-Texture2D gtxtMetallicTexture : register(t9);
-Texture2D gtxtEmissionTexture : register(t10);
-Texture2D gtxtDetailAlbedoTexture : register(t11);
-Texture2D gtxtDetailNormalTexture : register(t12);
+Texture2D gtxtAlbedoTexture : register(t0);
+Texture2D gtxtSpecularTexture : register(t1);
+Texture2D gtxtNormalTexture : register(t2);
+Texture2D gtxtMetallicTexture : register(t3);
+Texture2D gtxtEmissionTexture : register(t4);
+Texture2D gtxtDetailAlbedoTexture : register(t5);
+Texture2D gtxtDetailNormalTexture : register(t6);
+
+//Texture2D gtxtAlbedoTexture : register(t6);
+//Texture2D gtxtSpecularTexture : register(t7);
+//Texture2D gtxtNormalTexture : register(t8);
+//Texture2D gtxtMetallicTexture : register(t9);
+//Texture2D gtxtEmissionTexture : register(t10);
+//Texture2D gtxtDetailAlbedoTexture : register(t11);
+//Texture2D gtxtDetailNormalTexture : register(t12);
 
 #include "Light.hlsl"
 

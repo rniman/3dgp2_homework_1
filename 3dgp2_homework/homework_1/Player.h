@@ -83,22 +83,21 @@ protected:
 	CShader*	m_pShader = nullptr;
 };
 
-class CAirplanePlayer : public CPlayer
+class CHelicopterPlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
-	virtual ~CAirplanePlayer();
+	CHelicopterPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	virtual ~CHelicopterPlayer();
 
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = nullptr);
 
-	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
+	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
 
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
-
 };
 
 

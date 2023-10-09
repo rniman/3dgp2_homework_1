@@ -8,9 +8,9 @@ struct VS_TERRAIN_OUTPUT
 
 SamplerState gssWrap : register(s0);
 
-Texture2D gtxtTerrainTexture : register(t14);
-Texture2D gtxtDetailTexture : register(t15);
-Texture2D gtxtAlphaTexture : register(t16);
+Texture2D gtxtTerrainTexture : register(t8);
+Texture2D gtxtDetailTexture : register(t9);
+Texture2D gtxtAlphaTexture : register(t10);
 
 float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
