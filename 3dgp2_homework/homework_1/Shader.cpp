@@ -51,55 +51,37 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR *pszFileName, LPCSTR 
 	return(d3dShaderByteCode);
 }
 
-#define _WITH_WFOPEN
-//#define _WITH_STD_STREAM
-
-#ifdef _WITH_STD_STREAM
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <sstream>
-#endif
-
 D3D12_SHADER_BYTECODE CShader::ReadCompiledShaderFromFile(WCHAR *pszFileName, ID3DBlob **ppd3dShaderBlob)
 {
-	UINT nReadBytes = 0;
-#ifdef _WITH_WFOPEN
-	FILE *pFile = nullptr;
-	::_wfopen_s(&pFile, pszFileName, L"rb");
-	::fseek(pFile, 0, SEEK_END);
-	int nFileSize = ::ftell(pFile);
-	BYTE *pByteCode = new BYTE[nFileSize];
-	::rewind(pFile);
-	nReadBytes = (UINT)::fread(pByteCode, sizeof(BYTE), nFileSize, pFile);
-	::fclose(pFile);
-#endif
-#ifdef _WITH_STD_STREAM
-	std::ifstream ifsFile;
-	ifsFile.open(pszFileName, std::ios::in | std::ios::ate | std::ios::binary);
-	nReadBytes = (int)ifsFile.tellg();
-	BYTE *pByteCode = new BYTE[*pnReadBytes];
-	ifsFile.seekg(0);
-	ifsFile.read((char *)pByteCode, nReadBytes);
-	ifsFile.close();
-#endif
+	std::ifstream readFile(pszFileName, std::ios::binary | std::ios::ate);
 
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	if (!readFile)
+	{
+		assert("파일 열기 실패!");
+	}
+
+	std::streamoff fileSize = readFile.tellg();
+	readFile.seekg(0, std::ios::beg);
+
+	std::vector<BYTE> byteCode;
+	byteCode.reserve(fileSize);
+	readFile.read((char*)byteCode.data(), fileSize);
+	D3D12_SHADER_BYTECODE d3dByteCode;
+
 	if (ppd3dShaderBlob)
 	{
-		*ppd3dShaderBlob = nullptr;
-		HRESULT hResult = D3DCreateBlob(nReadBytes, ppd3dShaderBlob);
-		memcpy((*ppd3dShaderBlob)->GetBufferPointer(), pByteCode, nReadBytes);
-		d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
-		d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
-	}
+		HRESULT hResult = D3DCreateBlob(fileSize, ppd3dShaderBlob);
+		memcpy((*ppd3dShaderBlob)->GetBufferPointer(), byteCode.data(), fileSize);
+		d3dByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
+		d3dByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
+}
 	else
 	{
-		d3dShaderByteCode.BytecodeLength = nReadBytes;
-		d3dShaderByteCode.pShaderBytecode = pByteCode;
+		d3dByteCode.BytecodeLength = fileSize;
+		d3dByteCode.pShaderBytecode = byteCode.data();
 	}
 
-	return(d3dShaderByteCode);
+	return d3dByteCode;
 }
 
 D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout()
@@ -255,12 +237,12 @@ D3D12_DEPTH_STENCIL_DESC CSkyBoxShader::CreateDepthStencilState()
 
 D3D12_SHADER_BYTECODE CSkyBoxShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSkyBox", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSSkyBox.cso", &m_pd3dVertexShaderBlob);
 }
 
 D3D12_SHADER_BYTECODE CSkyBoxShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSkyBox", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSSkyBox.cso", &m_pd3dPixelShaderBlob);
 }
 
 void CSkyBoxShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
@@ -311,12 +293,12 @@ D3D12_INPUT_LAYOUT_DESC CStandardShader::CreateInputLayout()
 
 D3D12_SHADER_BYTECODE CStandardShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSStandard.cso", &m_pd3dVertexShaderBlob);
 }
 
 D3D12_SHADER_BYTECODE CStandardShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSStandard.cso", &m_pd3dPixelShaderBlob);
 }
 
 void CStandardShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
@@ -496,12 +478,12 @@ D3D12_INPUT_LAYOUT_DESC CPlayerShader::CreateInputLayout()
 
 D3D12_SHADER_BYTECODE CPlayerShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSStandard.cso", &m_pd3dVertexShaderBlob);
 }
 
 D3D12_SHADER_BYTECODE CPlayerShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSStandard.cso", &m_pd3dPixelShaderBlob);
 }
 
 void CPlayerShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
@@ -551,12 +533,12 @@ D3D12_INPUT_LAYOUT_DESC CTerrainShader::CreateInputLayout()
 
 D3D12_SHADER_BYTECODE CTerrainShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTerrain", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSTerrain.cso", &m_pd3dVertexShaderBlob);
 }
 
 D3D12_SHADER_BYTECODE CTerrainShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTerrain", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSTerrain.cso", &m_pd3dPixelShaderBlob);
 }
 
 void CTerrainShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)

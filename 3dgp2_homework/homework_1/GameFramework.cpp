@@ -380,9 +380,6 @@ void CGameFramework::OnDestroy()
 
 void CGameFramework::BuildObjects()
 {
-	float a = XMConvertToDegrees(atan(0.5));
-
-
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), nullptr);
 
 	m_pScene = new CScene();

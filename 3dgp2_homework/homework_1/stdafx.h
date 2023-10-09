@@ -20,9 +20,11 @@
 #include <wrl.h>
 #include <shellapi.h>
 
+// stl
 #include <fstream>
 #include <vector>
 #include <array>
+#include <unordered_map>
 
 using namespace std;
 

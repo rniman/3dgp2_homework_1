@@ -132,11 +132,6 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 
 void CCamera::ReleaseShaderVariables()
 {
-	if (m_pd3dcbCamera)
-	{
-		m_pd3dcbCamera->Unmap(0, nullptr);
-		m_pd3dcbCamera.ReleaseAndGetAddressOf();
-	}
 }
 
 void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dCommandList)
