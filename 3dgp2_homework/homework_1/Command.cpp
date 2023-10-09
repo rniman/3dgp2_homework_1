@@ -6,28 +6,28 @@
 void CForwardCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), 0.25f);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), 1.25f);
 	player->Move(shift, true);
 }
 
 void CBackwardCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), -0.25f);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), -1.25f);
 	player->Move(shift, true);
 }
 
 void CRightCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), 0.25f);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), 1.25f);
 	player->Move(shift, true);
 }
 
 void CLeftCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), -0.25f);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), -1.25f);
 	player->Move(shift, true);
 }
 

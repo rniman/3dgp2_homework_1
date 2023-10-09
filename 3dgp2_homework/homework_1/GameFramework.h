@@ -76,9 +76,7 @@ private:
 #if defined(_DEBUG)
 	ID3D12Debug						*m_pd3dDebugController;
 #endif
-
 	CGameTimer						m_GameTimer;
-
 	CScene							*m_pScene = nullptr;
 	CPlayer							*m_pPlayer = nullptr;
 	CCamera							*m_pCamera = nullptr;
@@ -86,5 +84,7 @@ private:
 	POINT							m_ptOldCursorPos;
 
 	_TCHAR							m_pszFrameRate[70];
+
+	std::shared_ptr<class CPlayerInputHandler> m_pPlayerInputHandler;
 };
 

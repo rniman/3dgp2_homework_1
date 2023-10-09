@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Command.h"
 
 CGameFramework::CGameFramework()
 {
@@ -47,7 +48,8 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CoInitialize(nullptr);
 
 	BuildObjects();
-
+	
+	m_pPlayerInputHandler = std::make_shared<CPlayerInputHandler>();
 	return(true);
 }
 
@@ -288,7 +290,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
 			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
+			::GetCursorPos(&CBaseInputHandler::m_sptOldCursorPos);
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
@@ -412,42 +414,18 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessInput()
 {
-	static UCHAR pKeysBuffer[256];
-	bool bProcessedByScene = false;
-	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
-	if (!bProcessedByScene)
+	if (!GetKeyboardState(CBaseInputHandler::m_spKeysBuffer))
 	{
-		DWORD dwDirection = 0;
-		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
-
-		float cxDelta = 0.0f, cyDelta = 0.0f;
-		POINT ptCursorPos;
-		if (GetCapture() == m_hWnd)
-		{
-			SetCursor(nullptr);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
-
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-		{
-			if (cxDelta || cyDelta)
-			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, true);
-		}
+#ifdef _DEBUG
+		char buf[256];
+		char err[] = "GetKeyboardState Fail";
+		sprintf_s(buf, sizeof(buf), "Debug: %s\n", err);
+		OutputDebugStringA(buf);
+#endif // DEBUG
 	}
+
+	m_pPlayerInputHandler->HandleInput(*m_pPlayer);
+
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
