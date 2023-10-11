@@ -320,8 +320,8 @@ CCamera *CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 		case THIRD_PERSON_CAMERA:
 			SetFriction(20.5f);
 			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			SetMaxVelocityXZ(25.5f);
-			SetMaxVelocityY(20.0f);
+			SetMaxVelocityXZ(1000.0f);
+			SetMaxVelocityY(1000.0f);
 			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.25f);
 			m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -30.0f));

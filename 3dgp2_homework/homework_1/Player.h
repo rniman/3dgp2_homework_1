@@ -1,14 +1,14 @@
 #pragma once
-
-#define DIR_FORWARD				0x01
-#define DIR_BACKWARD			0x02
-#define DIR_LEFT				0x04
-#define DIR_RIGHT				0x08
-#define DIR_UP					0x10
-#define DIR_DOWN				0x20
+//#define DIR_FORWARD				0x01
+//#define DIR_BACKWARD			0x02
+//#define DIR_LEFT				0x04
+//#define DIR_RIGHT				0x08
+//#define DIR_UP					0x10
+//#define DIR_DOWN				0x20
 
 #include "Object.h"
 #include "Camera.h"
+#include "Missile.h"
 
 class CPlayer : public CGameObject
 {
@@ -79,9 +79,10 @@ protected:
 	LPVOID		m_pCameraUpdatedContext;
 
 	CCamera*	m_pCamera = nullptr;
-
+	
 	CShader*	m_pShader = nullptr;
 };
+
 
 class CHelicopterPlayer : public CPlayer
 {
@@ -98,6 +99,8 @@ public:
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
+
+	std::array<class CMissile, MAX_NUM_MISSILE> m_arrayCMissile;
 };
 
 
