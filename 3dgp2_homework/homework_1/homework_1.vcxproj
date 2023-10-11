@@ -144,6 +144,7 @@
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="homework_1.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Missile.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
@@ -166,6 +167,7 @@
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="homework_1.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Missile.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
