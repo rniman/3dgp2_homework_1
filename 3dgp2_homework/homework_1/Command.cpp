@@ -6,29 +6,43 @@
 void CForwardCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), 1.25f);
-	player->Move(shift, true);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), 10.25f);
+	player->Move(shift, false);
 }
 
 void CBackwardCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), -1.25f);
-	player->Move(shift, true);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), -10.25f);
+	player->Move(shift, false);
 }
 
 void CRightCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), 1.25f);
-	player->Move(shift, true);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), 10.25f);
+	player->Move(shift, false);
 }
 
 void CLeftCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), -1.25f);
-	player->Move(shift, true);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), -10.25f);
+	player->Move(shift, false);
+}
+
+void CUpCommand::execute(CGameObject& gameObject)
+{
+	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetUp(), 10.25f);
+	player->Move(shift, false);
+}
+
+void CDownCommand::execute(CGameObject& gameObject)
+{
+	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetUp(), -10.25f);
+	player->Move(shift, false);
 }
 
 void CCameraRotateYCommand::execute(CGameObject& gameObject)
@@ -69,7 +83,8 @@ void CPlayerInputHandler::HandleInput(CGameObject& gameObject)
 	if (IsPressed(ButtonType::BUTTON_MOVE_BACKWARD)) button_backward->execute(gameObject);
 	if (IsPressed(ButtonType::BUTTON_MOVE_RIGHT)) button_right->execute(gameObject);
 	if (IsPressed(ButtonType::BUTTON_MOVE_LEFT)) button_left->execute(gameObject);
+	if (IsPressed(ButtonType::BUTTON_MOVE_UP)) button_up->execute(gameObject);
+	if (IsPressed(ButtonType::BUTTON_MOVE_DOWN)) button_down->execute(gameObject);
 	if (IsPressed(ButtonType::BUTTON_CAMERA_ROTATE_Y)) button_camera_rotate_y->execute(gameObject);
 }
-
 
