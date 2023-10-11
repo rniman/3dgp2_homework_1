@@ -10,7 +10,8 @@ enum class ButtonType
 	BUTTON_MOVE_LEFT,
 	BUTTON_MOVE_DOWN,
 	BUTTON_MOVE_UP,
-	BUTTON_CAMERA_ROTATE_Y
+	BUTTON_CAMERA_ROTATE_Y,
+	BUTTON_FIRE
 };
 
 class CBaseCommand
@@ -69,6 +70,13 @@ public:
 	virtual void execute(CGameObject& gameObject) override;
 };
 
+class CFireCommand : public CBaseCommand
+{
+public:
+	virtual ~CFireCommand() {}
+	virtual void execute(CGameObject& gameObject) override;
+};
+
 class CBaseInputHandler
 {
 public:
@@ -112,6 +120,7 @@ public:
 		m_mapButtonToKey[ButtonType::BUTTON_MOVE_UP] = VK_SPACE;
 		m_mapButtonToKey[ButtonType::BUTTON_MOVE_DOWN] = VK_LSHIFT;
 		m_mapButtonToKey[ButtonType::BUTTON_CAMERA_ROTATE_Y] = VK_LBUTTON;
+		m_mapButtonToKey[ButtonType::BUTTON_FIRE] = VK_LCONTROL;
 
 		button_forward = make_unique<CForwardCommand>();
 		button_backward = make_unique<CBackwardCommand>();
@@ -120,6 +129,7 @@ public:
 		button_up = make_unique<CUpCommand>();
 		button_down = make_unique<CDownCommand>();
 		button_camera_rotate_y = make_unique<CCameraRotateYCommand>();
+		button_fire = make_unique<CFireCommand>();
 	}
 
 	virtual ~CPlayerInputHandler() {};
@@ -133,4 +143,5 @@ private:
 	std::unique_ptr<CBaseCommand> button_up;
 	std::unique_ptr<CBaseCommand> button_down;
 	std::unique_ptr<CBaseCommand> button_camera_rotate_y;
+	std::unique_ptr<CBaseCommand> button_fire;
 };

@@ -64,6 +64,10 @@ void CCameraRotateYCommand::execute(CGameObject& gameObject)
 	player->Rotate(deltaY, deltaX, 0.0f);
 }
 
+void CFireCommand::execute(CGameObject& gameObject)
+{
+}
+
 UCHAR CBaseInputHandler::m_spKeysBuffer[] = {};
 POINT CBaseInputHandler::m_sptOldCursorPos = { 0, 0 };
 HWND CBaseInputHandler::m_shWnd;
@@ -86,5 +90,7 @@ void CPlayerInputHandler::HandleInput(CGameObject& gameObject)
 	if (IsPressed(ButtonType::BUTTON_MOVE_UP)) button_up->execute(gameObject);
 	if (IsPressed(ButtonType::BUTTON_MOVE_DOWN)) button_down->execute(gameObject);
 	if (IsPressed(ButtonType::BUTTON_CAMERA_ROTATE_Y)) button_camera_rotate_y->execute(gameObject);
+	if (IsPressed(ButtonType::BUTTON_FIRE)) button_fire->execute(gameObject);
 }
+
 
