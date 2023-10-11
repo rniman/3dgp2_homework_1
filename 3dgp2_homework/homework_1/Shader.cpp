@@ -323,7 +323,7 @@ void CStandardShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 //
 CObjectsShader::CObjectsShader()
 {
-	m_nObjects = 120;
+	m_nObjects = 2;
 }
 
 CObjectsShader::~CObjectsShader()
