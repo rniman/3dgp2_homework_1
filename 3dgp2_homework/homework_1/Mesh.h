@@ -104,10 +104,6 @@ public:
 	CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual ~CMesh();
 
-private:
-	int								m_nReferences = 0;
-
-public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
@@ -115,7 +111,11 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
 
 	// interface
-	UINT GetType() { return(m_nType); }
+	UINT GetType() const { return(m_nType); }
+	BoundingOrientedBox GetOOBB() const { return m_OOBB; };
+
+private:
+	int								m_nReferences = 0;
 
 protected:
 	UINT							m_nType = 0x00;
@@ -142,6 +142,8 @@ protected:
 	VectorComptrResource			m_ppd3dSubSetIndexBuffers;
 	VectorComptrResource			m_ppd3dSubSetIndexUploadBuffers;
 	vector<D3D12_INDEX_BUFFER_VIEW>	m_pd3dSubSetIndexBufferViews;
+
+	BoundingOrientedBox				m_OOBB{ BoundingOrientedBox() };	//모델 좌표계의 바운딩 박스
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

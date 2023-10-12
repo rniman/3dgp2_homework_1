@@ -7,13 +7,6 @@
 #include "Mesh.h"
 #include "Camera.h"
 
-#define DIR_FORWARD					0x01
-#define DIR_BACKWARD				0x02
-#define DIR_LEFT					0x04
-#define DIR_RIGHT					0x08
-#define DIR_UP						0x10
-#define DIR_DOWN					0x20
-
 class CShader;
 class CStandardShader;
 
@@ -104,6 +97,14 @@ private:
 
 class CGameObject;
 
+struct MATERIAL
+{
+	XMFLOAT4						m_xmf4Ambient;
+	XMFLOAT4						m_xmf4Diffuse;
+	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
+	XMFLOAT4						m_xmf4Emissive;
+};
+
 class CMaterial
 {
 public:
@@ -175,10 +176,9 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial);
 
 	virtual void ReleaseUploadBuffers();
@@ -206,6 +206,7 @@ public:
 
 	int FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRIPTOR_HANDLE* pd3dSrvGpuDescriptorHandle);
 
+	CMesh* GetMesh(UINT nIndex) const { return m_ppMeshes[nIndex]; };
 	UINT GetMeshType(UINT nIndex) { return((m_ppMeshes[nIndex]) ? m_ppMeshes[nIndex]->GetType() : 0x00); }
 
 	void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, CShader* pShader);
@@ -215,6 +216,9 @@ public:
 
 	static void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 
+	// interface
+	virtual void SetOOBB();
+	BoundingOrientedBox GetOOBB() const { return m_OOBB; };
 public:
 	char		 m_pstrFrameName[64];
 
@@ -231,6 +235,7 @@ public:
 	CGameObject* m_pChild = nullptr;
 	CGameObject* m_pSibling = nullptr;
 
+	BoundingOrientedBox m_OOBB{ BoundingOrientedBox() };
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

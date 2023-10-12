@@ -114,9 +114,6 @@ public:
 
 	CPlayer*							m_pPlayer = nullptr;
 
-	int									m_nGameObjects = 0;
-	CGameObject**						m_ppGameObjects = nullptr;
-
 	int									m_nShaders = 0;
 	CShader**							m_ppShaders = nullptr;
 

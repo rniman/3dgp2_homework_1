@@ -426,6 +426,14 @@ void CObjectsShader::ReleaseObjects()
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->Animate(fTimeElapsed);
+			m_ppObjects[j]->UpdateTransform(nullptr);
+		}
+	}
 }
 
 void CObjectsShader::ReleaseUploadBuffers()
@@ -441,8 +449,6 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 	{
 		if (m_ppObjects[j])
 		{
-			m_ppObjects[j]->Animate(0.16f);
-			m_ppObjects[j]->UpdateTransform(nullptr);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
