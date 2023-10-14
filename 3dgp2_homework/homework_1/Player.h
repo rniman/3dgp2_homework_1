@@ -16,6 +16,31 @@ public:
 	CPlayer();
 	virtual ~CPlayer();
 
+	virtual void Animate(float fTimeElapsed);
+
+	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(nullptr); }
+	virtual void OnPrepareRender();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
+
+	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
+	void Rotate(float x, float y, float z);
+
+	void Update(float fTimeElapsed);
+
+	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+
+	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }
+	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
+
+	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
+	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
+
+	CCamera *OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
+
+
+	// interface
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
@@ -33,32 +58,8 @@ public:
 	float GetPitch() const { return(m_fPitch); }
 	float GetRoll() const { return(m_fRoll); }
 
-	CCamera *GetCamera() { return(m_pCamera); }
-	void SetCamera(CCamera *pCamera) { m_pCamera = pCamera; }
-
-	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
-	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
-	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
-	void Rotate(float x, float y, float z);
-
-	void Update(float fTimeElapsed);
-
-	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }
-	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
-
-	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
-	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
-
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void ReleaseShaderVariables();
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
-
-	CCamera *OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
-
-	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(nullptr); }
-	virtual void OnPrepareRender();
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = nullptr);
-
+	CCamera* GetCamera() { return(m_pCamera); }
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 protected:
 	XMFLOAT3	m_xmf3Position;
 	XMFLOAT3	m_xmf3Right;
@@ -79,7 +80,6 @@ protected:
 	LPVOID		m_pCameraUpdatedContext;
 
 	CCamera*	m_pCamera = nullptr;
-	
 	CShader*	m_pShader = nullptr;
 };
 
@@ -93,11 +93,12 @@ public:
 	void PrepareOOBB();
 
 	virtual void PrepareAnimate();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = nullptr);
+	virtual void Animate(float fTimeElapsed);
 
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
 
+	// interface
 	void SetOOBB() override;
 
 private:

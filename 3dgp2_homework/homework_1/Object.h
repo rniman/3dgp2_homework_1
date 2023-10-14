@@ -170,7 +170,7 @@ public:
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 
 	virtual void PrepareAnimate() { }
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = nullptr);
+	virtual void Animate(float fTimeElapsed);
 
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
@@ -187,7 +187,7 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
-
+	XMFLOAT4X4 GetLocalTransform() const;
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
@@ -228,7 +228,7 @@ public:
 	int			 m_nMaterials = 0;
 	CMaterial**	 m_ppMaterials = nullptr;
 
-	XMFLOAT4X4	 m_xmf4x4Transform;
+	XMFLOAT4X4	 m_xmf4x4Local;
 	XMFLOAT4X4	 m_xmf4x4World;
 
 	CGameObject* m_pParent = nullptr;
@@ -247,7 +247,7 @@ public:
 	virtual ~CSuperCobraObject();
 
 	virtual void PrepareAnimate();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = nullptr);
+	virtual void Animate(float fTimeElapsed);
 
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
@@ -261,7 +261,7 @@ public:
 	virtual ~CGunshipObject();
 
 	virtual void PrepareAnimate();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = nullptr);
+	virtual void Animate(float fTimeElapsed);
 
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
@@ -275,11 +275,23 @@ public:
 	virtual ~CMi24Object();
 
 	virtual void PrepareAnimate();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = nullptr);
+	virtual void Animate(float fTimeElapsed);
 
 private:
 	CGameObject	*m_pMainRotorFrame = nullptr;
 	CGameObject	*m_pTailRotorFrame = nullptr;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CWhat: public CGameObject
+{
+public:
+	CWhat(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CWhat();
+
+	virtual void PrepareAnimate();
+	virtual void Animate(float fTimeElapsed);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -316,4 +328,20 @@ private:
 	int					m_nWidth;
 	int					m_nLength;
 	XMFLOAT3			m_xmf3Scale;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CFloorObjcet :public CGameObject
+{
+public:
+	CFloorObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
+	virtual ~CFloorObjcet();
+
+	virtual void Animate(float fTimeElapsed);
+
+	virtual void SetPlayer(class CPlayer* pPlayer);
+
+private:
+	CPlayer* m_pPlayer = nullptr;
 };

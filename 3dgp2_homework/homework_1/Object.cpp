@@ -6,6 +6,7 @@
 #include "Object.h"
 #include "Shader.h"
 #include "Scene.h"
+#include "Player.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -306,7 +307,8 @@ void CMaterial::ReleaseShaderVariables()
 //
 CGameObject::CGameObject()
 {
-	m_xmf4x4Transform = Matrix4x4::Identity();
+	::ZeroMemory(&m_pstrFrameName, sizeof(m_pstrFrameName));
+	m_xmf4x4Local = Matrix4x4::Identity();
 	m_xmf4x4World = Matrix4x4::Identity();
 }
 
@@ -407,10 +409,10 @@ void CGameObject::SetMaterial(int nMaterial, CMaterial *pMaterial)
 	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
 }
 
-void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
+void CGameObject::Animate(float fTimeElapsed)
 {
-	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
-	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
+	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
+	if (m_pChild)m_pChild->Animate(fTimeElapsed);
 }
 
 CGameObject *CGameObject::FindFrame(char *pstrFrameName)
@@ -521,7 +523,7 @@ void CGameObject::ReleaseUploadBuffers()
 
 void CGameObject::UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent)
 {
-	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Local, *pxmf4x4Parent) : m_xmf4x4Local;
 	
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
@@ -529,11 +531,9 @@ void CGameObject::UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent)
 
 void CGameObject::SetPosition(float x, float y, float z)
 {
-	m_xmf4x4Transform._41 = x;
-	m_xmf4x4Transform._42 = y;
-	m_xmf4x4Transform._43 = z;
-
-	UpdateTransform(nullptr);
+	m_xmf4x4Local._41 = x;
+	m_xmf4x4Local._42 = y;
+	m_xmf4x4Local._43 = z;
 }
 
 void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
@@ -544,29 +544,32 @@ void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 void CGameObject::SetScale(float x, float y, float z)
 {
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
-
-	UpdateTransform(nullptr);
+	m_xmf4x4Local = Matrix4x4::Multiply(mtxScale, m_xmf4x4Local);
 }
 
 XMFLOAT3 CGameObject::GetPosition()
 {
-	return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43));
+	return(XMFLOAT3(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43));
 }
 
 XMFLOAT3 CGameObject::GetLook()
 {
-	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33)));
+	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33)));
 }
 
 XMFLOAT3 CGameObject::GetUp()
 {
-	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23)));
+	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._21, m_xmf4x4Local._22, m_xmf4x4Local._23)));
 }
 
 XMFLOAT3 CGameObject::GetRight()
 {
-	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13)));
+	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._11, m_xmf4x4Local._12, m_xmf4x4Local._13)));
+}
+
+XMFLOAT4X4 CGameObject::GetLocalTransform() const
+{
+	return m_xmf4x4Local;
 }
 
 void CGameObject::MoveStrafe(float fDistance)
@@ -596,25 +599,19 @@ void CGameObject::MoveForward(float fDistance)
 void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
-
-	UpdateTransform(nullptr);
+	m_xmf4x4Local = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Local);
 }
 
 void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis), XMConvertToRadians(fAngle));
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
-
-	UpdateTransform(nullptr);
+	m_xmf4x4Local = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Local);
 }
 
 void CGameObject::Rotate(XMFLOAT4 *pxmf4Quaternion)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationQuaternion(XMLoadFloat4(pxmf4Quaternion));
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
-
-	UpdateTransform(nullptr);
+	m_xmf4x4Local = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Local);
 }
 
 //#define _WITH_DEBUG_FRAME_HIERARCHY
@@ -783,7 +780,7 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 		}
 		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
 		{
-			nReads = (UINT)::fread(&pGameObject->m_xmf4x4Transform, sizeof(float), 16, pInFile);
+			nReads = (UINT)::fread(&pGameObject->m_xmf4x4Local, sizeof(float), 16, pInFile);
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{
@@ -840,6 +837,15 @@ CGameObject *CGameObject::LoadGeometryFromFile(ID3D12Device *pd3dDevice, ID3D12G
 {
 	FILE *pInFile = nullptr;
 	::fopen_s(&pInFile, pstrFileName, "rb");
+	if (pInFile == NULL)
+	{
+#ifdef _DEBUG
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("LoadGeometryFromFile Fail\n"));
+		OutputDebugString(pstrDebug);
+#endif
+	}
+
 	::rewind(pInFile);
 
 	CGameObject *pGameObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nullptr, pInFile, pShader);
@@ -857,40 +863,7 @@ CGameObject *CGameObject::LoadGeometryFromFile(ID3D12Device *pd3dDevice, ID3D12G
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
-CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1, 1)
-{
-	CSkyBoxMesh *pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 20.0f);
-	SetMesh(0, pSkyBoxMesh);
 
-	CTexture *pSkyBoxTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
-	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/dark.dds", RESOURCE_TEXTURE_CUBE, 0);
-	CScene::CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 10);
-
-	CSkyBoxShader *pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	CMaterial *pSkyBoxMaterial = new CMaterial();
-	pSkyBoxMaterial->SetTexture(pSkyBoxTexture);
-	pSkyBoxMaterial->SetShader(pSkyBoxShader);
-
-	SetMaterial(0, pSkyBoxMaterial);
-}
-
-CSkyBox::~CSkyBox()
-{
-}
-
-void CSkyBox::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
-{
-	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
-	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
-
-	CGameObject::Render(pd3dCommandList, pCamera);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 CSuperCobraObject::CSuperCobraObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(0, 0)
 {
 }
@@ -905,20 +878,20 @@ void CSuperCobraObject::PrepareAnimate()
 	m_pTailRotorFrame = FindFrame("TailRotor");
 }
 
-void CSuperCobraObject::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
+void CSuperCobraObject::Animate(float fTimeElapsed)
 {
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+		m_pMainRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Local);
 	}
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+		m_pTailRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Local);
 	}
 
-	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	CGameObject::Animate(fTimeElapsed);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -937,20 +910,20 @@ void CGunshipObject::PrepareAnimate()
 	m_pTailRotorFrame = FindFrame("Back_Rotor");
 }
 
-void CGunshipObject::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
+void CGunshipObject::Animate(float fTimeElapsed)
 {
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+		m_pMainRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Local);
 	}
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+		m_pTailRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Local);
 	}
 
-	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	CGameObject::Animate(fTimeElapsed);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -963,31 +936,88 @@ CMi24Object::~CMi24Object()
 {
 }
 
+
+
 void CMi24Object::PrepareAnimate()
 {
 	m_pMainRotorFrame = FindFrame("Top_Rotor");
 	m_pTailRotorFrame = FindFrame("Tail_Rotor");
 }
 
-void CMi24Object::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
+void CMi24Object::Animate(float fTimeElapsed)
 {
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+		m_pMainRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Local);
 	}
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+		m_pTailRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Local);
 	}
 
-	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	CGameObject::Animate(fTimeElapsed);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) : CGameObject(0, 1)
+CWhat::CWhat(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+}
+
+CWhat::~CWhat()
+{
+}
+
+void CWhat::PrepareAnimate()
+{
+}
+
+void CWhat::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1, 1)
+{
+	CSkyBoxMesh* pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 20.0f);
+	SetMesh(0, pSkyBoxMesh);
+
+	CTexture* pSkyBoxTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/dark.dds", RESOURCE_TEXTURE_CUBE, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 10);
+
+	CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
+	pSkyBoxShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CMaterial* pSkyBoxMaterial = new CMaterial();
+	pSkyBoxMaterial->SetTexture(pSkyBoxTexture);
+	pSkyBoxMaterial->SetShader(pSkyBoxShader);
+
+	SetMaterial(0, pSkyBoxMaterial);
+}
+
+CSkyBox::~CSkyBox()
+{
+}
+
+void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
+	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
+	UpdateTransform();
+	CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) 
+	: CGameObject(0, 1)
 {
 	m_nWidth = nWidth;
 	m_nLength = nLength;
@@ -1042,3 +1072,43 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CFloorObjcet::CFloorObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+	: CGameObject(1, 1)
+{
+	CTexturedRectMesh* pTextureRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10000.0f, 0.0f, 10000.0f, 10.0f, 10.0f);
+	SetMesh(0, pTextureRectMesh);
+
+	CTexture* pTestTexture = new CTexture(2, RESOURCE_TEXTURE2D, 0, 1);
+	pTestTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Skybox/Water_Base_Texture_0.dds", RESOURCE_TEXTURE2D, 0);
+	pTestTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Skybox/Water_Texture_Alpha.dds", RESOURCE_TEXTURE2D, 1);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture, 0, 3);
+
+	CMaterial* pTestMaterial = new CMaterial();
+	pTestMaterial->SetTexture(pTestTexture);
+	SetMaterial(0, pTestMaterial);
+
+	SetPosition(0.0f, 200.0f, 0.0f);
+
+	SetPlayer((CPlayer*)pContext);
+	
+}
+
+CFloorObjcet::~CFloorObjcet()
+{
+}
+
+void CFloorObjcet::Animate(float fTimeElapsed)
+{
+	if(m_pPlayer)
+	{
+		m_xmf4x4Local._41 = m_pPlayer->GetPosition().x;
+		m_xmf4x4Local._43 = m_pPlayer->GetPosition().z;
+	}
+}
+
+void CFloorObjcet::SetPlayer(CPlayer* pPlayer)
+{
+	m_pPlayer = pPlayer;
+}

@@ -191,7 +191,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_pDescriptorHeap = new CDescriptorHeap();
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 1 + 1 + 4); //SuperCobra(17), Gunship(2), Player(1), Skybox(1), Terrain(4)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 3 + 8 + 1 + 1 + 4 + 1); //SuperCobra(17), Gunship(3), , Mi24(1), Skybox(1), Terrain(4), Floor
+
+	CHelicopterPlayer* pAirplanePlayer = new CHelicopterPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
+	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pPlayer = pAirplanePlayer;
 
 	BuildDefaultLightsAndMaterials();
 
@@ -201,15 +205,19 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/terrain.raw"), 2049, 2049, 2049, 2049, xmf3Scale, xmf4Color);
 
-	m_nShaders = 1;
+	m_nShaders = 2;
 	m_ppShaders = new CShader*[m_nShaders];
-
+	
 	CObjectsShader* pObjectsShader = new CObjectsShader();
-	//int nObjects = pObjectsShader->GetNumberOfObjects();
 	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), nullptr);
-
+	
+	CFloorsShader* pFloorShader = new CFloorsShader();
+	pFloorShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
+	pFloorShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pPlayer);
+	
 	m_ppShaders[0] = pObjectsShader;
+	m_ppShaders[1] = pFloorShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -241,7 +249,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = nullptr;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[9];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[10];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -297,7 +305,13 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dDescriptorRanges[8].RegisterSpace = 0;
 	pd3dDescriptorRanges[8].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[12];
+	pd3dDescriptorRanges[9].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[9].NumDescriptors = 1;
+	pd3dDescriptorRanges[9].BaseShaderRegister = 12; //t12: gtxtFloorTexture
+	pd3dDescriptorRanges[9].RegisterSpace = 0;
+	pd3dDescriptorRanges[9].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[13];
 
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[1].Descriptor.ShaderRegister = 1; //Camera
@@ -359,6 +373,11 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[11].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[11].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[8]);
 	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dRootParameters[12].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[12].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[12].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[9]);
+	pd3dRootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
 
@@ -458,8 +477,6 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		//case 'D': m_ppGameObjects[0]->MoveStrafe(+1.0f); break;
 		//case 'Q': m_ppGameObjects[0]->MoveUp(+1.0f); break;
 		//case 'R': m_ppGameObjects[0]->MoveUp(-1.0f); break;
-		default:
-			break;
 		}
 		break;
 	default:
@@ -475,7 +492,13 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < m_nShaders; i++) 
+	{
+		if (m_ppShaders[i])
+		{
+			m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+		}
+	}
 	
 	if (m_pLights)
 	{
@@ -497,6 +520,12 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) 
+	{
+		if (m_ppShaders[i]) 
+		{
+			m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+		}
+	}
 }
 

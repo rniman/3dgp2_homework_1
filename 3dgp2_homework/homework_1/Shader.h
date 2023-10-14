@@ -114,12 +114,6 @@ protected:
 	CGameObject**	m_ppObjects = 0;
 	int				m_nObjects = 0;
 
-	float			m_fxPitch = 0;
-	float			m_fyPitch = 0;
-	float			m_fzPitch = 0;
-	int				m_xObjects = 0;
-	int				m_yObjects = 0;
-	int				m_zObjects = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,5 +145,35 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+class CFloorsShader : public CShader
+{
+public:
+	CFloorsShader();
+	virtual ~CFloorsShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
+	virtual D3D12_BLEND_DESC CreateBlendState();
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
+	virtual void ReleaseObjects();
+
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+
+	virtual void ReleaseUploadBuffers();
+
+private:
+	CGameObject**	m_ppObjects = nullptr;
+	int				m_nObjects = 0;
 };
 

@@ -389,10 +389,7 @@ void CGameFramework::BuildObjects()
 	{
 		m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	}
-
-	CHelicopterPlayer *pAirplanePlayer = new CHelicopterPlayer(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature());
-	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
+	m_pPlayer = m_pScene->m_pPlayer;
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList.Get()};
@@ -437,7 +434,7 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
-	m_pPlayer->Animate(fTimeElapsed, nullptr);
+	m_pPlayer->Animate(fTimeElapsed);
 }
 
 void CGameFramework::WaitForGpuComplete()

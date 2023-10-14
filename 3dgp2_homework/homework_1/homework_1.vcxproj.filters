@@ -152,5 +152,11 @@
     <FxCompile Include="PSSkyBox.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="VSFloor.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="PSFloor.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

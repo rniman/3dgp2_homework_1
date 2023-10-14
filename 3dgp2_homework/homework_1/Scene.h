@@ -119,7 +119,7 @@ public:
 
 	CSkyBox*							m_pSkyBox = nullptr;
 	CHeightMapTerrain*					m_pTerrain = nullptr;
-
+	
 	LIGHT*								m_pLights = nullptr;
 	int									m_nLights = 0;
 

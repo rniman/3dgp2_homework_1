@@ -361,6 +361,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 
 	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
 	CGameObject* pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
+	//CGameObject* pWhatModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", this);
 
 	int nColumnSpace = 5, nColumnSize = 30;           
     int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
@@ -431,7 +432,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 		if (m_ppObjects[j])
 		{
 			m_ppObjects[j]->Animate(fTimeElapsed);
-			m_ppObjects[j]->UpdateTransform(nullptr);
+			//m_ppObjects[j]->UpdateTransform(nullptr);
 		}
 	}
 }
@@ -449,6 +450,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 	{
 		if (m_ppObjects[j])
 		{
+			m_ppObjects[j]->UpdateTransform();
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
@@ -567,4 +569,152 @@ void CTerrainShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CFloorsShader::CFloorsShader()
+{
+	m_nObjects = 1;
+}
+
+CFloorsShader::~CFloorsShader()
+{
+}
+
+D3D12_INPUT_LAYOUT_DESC CFloorsShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 2;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
+}
+
+D3D12_SHADER_BYTECODE CFloorsShader::CreateVertexShader()
+{
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSFloor.cso", &m_pd3dVertexShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CFloorsShader::CreatePixelShader()
+{
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSFloor.cso", &m_pd3dVertexShaderBlob);
+}
+
+D3D12_RASTERIZER_DESC CFloorsShader::CreateRasterizerState()
+{
+	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
+	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	//	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
+	d3dRasterizerDesc.DepthBias = 0;
+	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 0.0f;
+	d3dRasterizerDesc.DepthClipEnable = TRUE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
+	d3dRasterizerDesc.ForcedSampleCount = 0;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return(d3dRasterizerDesc);
+}
+
+D3D12_BLEND_DESC CFloorsShader::CreateBlendState()
+{
+	//CStandardShader::CreateBlendState();
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = TRUE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_DEST_COLOR;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+
+void CFloorsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates.reserve(m_nPipelineStates);
+
+	for (int i = 0; i < m_nPipelineStates; ++i)
+	{
+		m_ppd3dPipelineStates.emplace_back(ComPtr<ID3D12PipelineState>());
+	}
+
+	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
+	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
+
+	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+void CFloorsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	m_ppObjects = new CGameObject* [m_nObjects];
+	CFloorObjcet* floor = new CFloorObjcet(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext);
+	m_ppObjects[0] = floor;
+	
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CFloorsShader::ReleaseObjects()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Release();
+		delete[] m_ppObjects;
+	}
+}
+
+void CFloorsShader::AnimateObjects(float fTimeElapsed)
+{
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->Animate(fTimeElapsed);
+		}
+	}
+}
+
+void CFloorsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->UpdateTransform();
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+		}
+	}
+}
+
+void CFloorsShader::ReleaseUploadBuffers()
+{
+	for (int j = 0; j < m_nObjects; j++) 
+	{
+		if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+	}
+}
+
+
 

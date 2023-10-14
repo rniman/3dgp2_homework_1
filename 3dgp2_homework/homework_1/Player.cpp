@@ -48,15 +48,12 @@ void CPlayer::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComm
 
 void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 {
+	CGameObject::UpdateShaderVariable(pd3dCommandList);
 }
 
 void CPlayer::ReleaseShaderVariables()
 {
 	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
-}
-
-void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
-{
 }
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
@@ -206,9 +203,14 @@ CCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 	return(pNewCamera);
 }
 
+void CPlayer::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+}
+
 void CPlayer::OnPrepareRender()
 {
-
+	CGameObject::OnPrepareRender();
 }
 
 void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
@@ -217,6 +219,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	if (nCameraMode == THIRD_PERSON_CAMERA)
 	{
 		if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera, 0);
+		UpdateTransform();
 		CGameObject::Render(pd3dCommandList, pCamera);
 	}
 }
@@ -257,27 +260,25 @@ void CHelicopterPlayer::PrepareAnimate()
 	m_pTailRotorFrame = FindFrame("Tail_Rotor");
 }
 
-void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
+void CHelicopterPlayer::Animate(float fTimeElapsed)
 {
-	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
-	m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
-	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
-	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
+	m_xmf4x4Local._11 = m_xmf3Right.x; m_xmf4x4Local._12 = m_xmf3Right.y; m_xmf4x4Local._13 = m_xmf3Right.z;
+	m_xmf4x4Local._21 = m_xmf3Up.x; m_xmf4x4Local._22 = m_xmf3Up.y; m_xmf4x4Local._23 = m_xmf3Up.z;
+	m_xmf4x4Local._31 = m_xmf3Look.x; m_xmf4x4Local._32 = m_xmf3Look.y; m_xmf4x4Local._33 = m_xmf3Look.z;
+	m_xmf4x4Local._41 = m_xmf3Position.x; m_xmf4x4Local._42 = m_xmf3Position.y; m_xmf4x4Local._43 = m_xmf3Position.z;
 
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+		m_pMainRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Local);
 	}
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+		m_pTailRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Local);
 	}
 
 	SetOOBB();
-
-	UpdateTransform(nullptr);
 }
 
 void CHelicopterPlayer::OnPrepareRender()
@@ -287,7 +288,7 @@ void CHelicopterPlayer::OnPrepareRender()
 
 void CHelicopterPlayer::SetOOBB()
 {
-	m_pMainBodyFrame->GetMesh(0)->GetOOBB().Transform(m_OOBB, XMLoadFloat4x4(&m_xmf4x4World));
+	m_pMainBodyFrame->GetMesh(0)->GetOOBB().Transform(m_OOBB, XMLoadFloat4x4(&m_xmf4x4Local));
 	XMStoreFloat4(&m_OOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_OOBB.Orientation)));
 }
 
