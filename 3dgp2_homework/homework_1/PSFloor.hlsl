@@ -6,7 +6,7 @@ struct VS_FLOOR_OUTPUT
 };
 
 Texture2D gtxAlbedo : register(t0);
-Texture2D gtxDetailAlbedo : register(t1);
+//Texture2D gtxDetailAlbedo : register(t1);
 
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
@@ -14,9 +14,9 @@ SamplerState gssClamp : register(s1);
 float4 PSFloor(VS_FLOOR_OUTPUT input) : SV_TARGET
 {
     float4 albedoColor = gtxAlbedo.Sample(gssWrap, input.uv);
-    float4 detailColor = gtxDetailAlbedo.Sample(gssWrap, input.uv);
-    
-    float4 cColor = lerp(albedoColor, detailColor, 0.0f);
-    
+
+    float4 cColor = albedoColor;
+    cColor.a = 0.90f;
+
     return cColor;
 }

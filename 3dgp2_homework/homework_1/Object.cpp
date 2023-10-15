@@ -1080,9 +1080,9 @@ CFloorObjcet::CFloorObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	CTexturedRectMesh* pTextureRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10000.0f, 0.0f, 10000.0f, 10.0f, 10.0f);
 	SetMesh(0, pTextureRectMesh);
 
-	CTexture* pTestTexture = new CTexture(2, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Skybox/Water_Base_Texture_0.dds", RESOURCE_TEXTURE2D, 0);
-	pTestTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Skybox/Water_Texture_Alpha.dds", RESOURCE_TEXTURE2D, 1);
+	CTexture* pTestTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//pTestTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Skybox/Water_Base_Texture_0.dds", RESOURCE_TEXTURE2D, 0);
+	pTestTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Skybox/sea-water-2048x2048.dds", RESOURCE_TEXTURE2D, 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture, 0, 3);
 
 	CMaterial* pTestMaterial = new CMaterial();
@@ -1101,11 +1101,11 @@ CFloorObjcet::~CFloorObjcet()
 
 void CFloorObjcet::Animate(float fTimeElapsed)
 {
-	if(m_pPlayer)
-	{
-		m_xmf4x4Local._41 = m_pPlayer->GetPosition().x;
-		m_xmf4x4Local._43 = m_pPlayer->GetPosition().z;
-	}
+	//if(m_pPlayer)
+	//{
+	//	m_xmf4x4Local._41 = m_pPlayer->GetPosition().x;
+	//	m_xmf4x4Local._43 = m_pPlayer->GetPosition().z;
+	//}
 }
 
 void CFloorObjcet::SetPlayer(CPlayer* pPlayer)
