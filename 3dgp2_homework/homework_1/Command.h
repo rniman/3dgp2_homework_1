@@ -113,10 +113,10 @@ public:
 	CPlayerInputHandler()
 		: CBaseInputHandler()
 	{
-		m_mapButtonToKey[ButtonType::BUTTON_MOVE_FORWARD] = VK_UP;
-		m_mapButtonToKey[ButtonType::BUTTON_MOVE_BACKWARD] = VK_DOWN;
-		m_mapButtonToKey[ButtonType::BUTTON_MOVE_RIGHT] = VK_RIGHT;
-		m_mapButtonToKey[ButtonType::BUTTON_MOVE_LEFT] = VK_LEFT;
+		m_mapButtonToKey[ButtonType::BUTTON_MOVE_FORWARD] = 'W';
+		m_mapButtonToKey[ButtonType::BUTTON_MOVE_BACKWARD] = 'S';
+		m_mapButtonToKey[ButtonType::BUTTON_MOVE_RIGHT] = 'D';
+		m_mapButtonToKey[ButtonType::BUTTON_MOVE_LEFT] = 'A';
 		m_mapButtonToKey[ButtonType::BUTTON_MOVE_UP] = VK_SPACE;
 		m_mapButtonToKey[ButtonType::BUTTON_MOVE_DOWN] = VK_LSHIFT;
 		m_mapButtonToKey[ButtonType::BUTTON_CAMERA_ROTATE_Y] = VK_LBUTTON;
