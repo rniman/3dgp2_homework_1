@@ -1081,7 +1081,9 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 CFloorObjcet::CFloorObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 	: CGameObject(1, 1)
 {
-	CTexturedRectMesh* pTextureRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10000.0f, 0.0f, 10000.0f, 10.0f, 10.0f);
+	float terrainSize = 2048.0f * 2.5f;
+
+	CTexturedRectMesh* pTextureRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, terrainSize * 3, 0.0f, terrainSize * 3, 10.0f, 10.0f);
 	SetMesh(0, pTextureRectMesh);
 
 	CTexture* pTestTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -1093,7 +1095,7 @@ CFloorObjcet::CFloorObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pTestMaterial->SetTexture(pTestTexture);
 	SetMaterial(0, pTestMaterial);
 
-	SetPosition(0.0f, 200.0f, 0.0f);
+	SetPosition(terrainSize / 2, 200.0f, terrainSize / 2);
 
 	SetPlayer((CPlayer*)pContext);
 	
