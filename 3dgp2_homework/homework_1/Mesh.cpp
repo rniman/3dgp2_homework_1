@@ -754,27 +754,72 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_nLength = nLength;
 	m_xmf3Scale = xmf3Scale;
 
-	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
-	int cxHeightMap = pHeightMapImage->GetRawImageWidth();
-	int czHeightMap = pHeightMapImage->GetRawImageLength();
+	
+	CHeightMapImage* pHeightMapImage;
+	int cxHeightMap = 0;
+	int czHeightMap = 0;
+	if(pContext != nullptr)
+	{
+		CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
+		cxHeightMap = pHeightMapImage->GetRawImageWidth();
+		czHeightMap = pHeightMapImage->GetRawImageLength();
+	}
 
 	m_pxmf3Positions = new XMFLOAT3[m_nVertices];
 	m_pxmf4Colors = new XMFLOAT4[m_nVertices];
 	m_pxmf2TextureCoords0 = new XMFLOAT2[m_nVertices];
 	m_pxmf2TextureCoords1 = new XMFLOAT2[m_nVertices];
 
-	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
-	for (int i = 0, z = zStart; z < (zStart + nLength); z++)
+	if (pContext == nullptr)
 	{
-		for (int x = xStart; x < (xStart + nWidth); x++, i++)
+		//m_pxmf3Positions[0] = XMFLOAT3((1.0f * m_xmf3Scale.x / 2) + 1024.0f, 100.0f, (-1.0f * m_xmf3Scale.z / 2) + 1024.0f);
+		//m_pxmf3Positions[1] = XMFLOAT3((1.0f * m_xmf3Scale.x / 2) + 1024.0f, 100.0f, (1.0f * m_xmf3Scale.z / 2) + 1024.0f);
+		//m_pxmf3Positions[2] = XMFLOAT3((-1.0f * m_xmf3Scale.x / 2) + 1024.0f, 100.0f, (-1.0f * m_xmf3Scale.z / 2) + 1024.0f);
+		//m_pxmf3Positions[3] = XMFLOAT3((-1.0f * m_xmf3Scale.x / 2) + 1024.0f, 100.0f, (1.0f * m_xmf3Scale.z / 2) + 1024.0f);
+
+		m_pxmf3Positions[0] = XMFLOAT3(((2048.0f + 2048.0f) * m_xmf3Scale.x), 100.0f, (((0.0f - 2048.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[1] = XMFLOAT3(((2048.0f + 2048.0f) * m_xmf3Scale.x), 100.0f, (((2048.0f + 2048.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[2] = XMFLOAT3(((0.0f - 2048.0f) * m_xmf3Scale.x), 100.0f, (((0.0f - 2048.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[3] = XMFLOAT3(((0.0f - 2048.0f) * m_xmf3Scale.x), 100.0f, (((2048.0f + 2048.0f) * m_xmf3Scale.z)));
+
+		m_pxmf4Colors[0] = xmf4Color;
+		m_pxmf4Colors[1] = xmf4Color;
+		m_pxmf4Colors[2] = xmf4Color;
+		m_pxmf4Colors[3] = xmf4Color;
+
+		m_pxmf2TextureCoords0[0] = XMFLOAT2(2.0f, 2.0f);
+		m_pxmf2TextureCoords1[0] = XMFLOAT2(1.0f / float(m_xmf3Scale.x * 0.5f), 1.0f / float(m_xmf3Scale.z * 0.5f));
+		
+		m_pxmf2TextureCoords0[1] = XMFLOAT2(2.0f, -1.0f);
+		m_pxmf2TextureCoords1[1] = XMFLOAT2(1.0f / float(m_xmf3Scale.x * 0.5f), 0.0f / float(m_xmf3Scale.z * 0.5f));
+		
+		m_pxmf2TextureCoords0[2] = XMFLOAT2(-1.0f, 2.0f);
+		m_pxmf2TextureCoords1[2] = XMFLOAT2(0.0f / float(m_xmf3Scale.x * 0.5f), 0.0f / float(m_xmf3Scale.z * 0.5f));
+		
+		m_pxmf2TextureCoords0[3] = XMFLOAT2(-1.0f, -1.0f);
+		m_pxmf2TextureCoords1[3] = XMFLOAT2(0.0f / float(m_xmf3Scale.x * 0.5f), 0.0f / float(m_xmf3Scale.z * 0.5f));
+
+
+
+
+
+	}
+	else
+	{
+		float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+		for (int i = 0, z = zStart; z < (zStart + nLength); z++)
 		{
-			fHeight = OnGetHeight(x, z, pContext);
-			m_pxmf3Positions[i] = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
-			m_pxmf4Colors[i] = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
-			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
-			m_pxmf2TextureCoords1[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 0.5f), float(z) / float(m_xmf3Scale.z * 0.5f));
-			if (fHeight < fMinHeight) fMinHeight = fHeight;
-			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
+			for (int x = xStart; x < (xStart + nWidth); x++, i++)
+			{
+				fHeight = OnGetHeight(x, z, pContext);
+				m_pxmf3Positions[i] = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
+				m_pxmf4Colors[i] = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
+				m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
+				m_pxmf2TextureCoords1[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 0.5f), float(z) / float(m_xmf3Scale.z * 0.5f));
+
+				if (fHeight < fMinHeight) fMinHeight = fHeight;
+				if (fHeight > fMaxHeight) fMaxHeight = fHeight;
+			}
 		}
 	}
 

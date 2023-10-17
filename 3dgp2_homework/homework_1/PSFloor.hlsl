@@ -16,7 +16,7 @@ float4 PSFloor(VS_FLOOR_OUTPUT input) : SV_TARGET
     float4 albedoColor = gtxAlbedo.Sample(gssWrap, input.uv);
 
     float4 cColor = albedoColor;
-    cColor.a = 0.90f;
+    cColor.a = 0.9f;
 
     return cColor;
 }

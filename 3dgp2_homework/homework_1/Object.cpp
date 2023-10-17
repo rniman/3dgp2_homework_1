@@ -1016,7 +1016,7 @@ void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) 
+CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color)
 	: CGameObject(0, 1)
 {
 	m_nWidth = nWidth;
@@ -1032,7 +1032,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	long cxBlocks = (m_nWidth - 1) / cxQuadsPerBlock;
 	long czBlocks = (m_nLength - 1) / czQuadsPerBlock;
 
-	m_nMeshes = cxBlocks * czBlocks;
+	m_nMeshes = cxBlocks * czBlocks + 1; // terrain + floor
 	m_ppMeshes = new CMesh * [m_nMeshes];
 	for (int i = 0; i < m_nMeshes; i++)	m_ppMeshes[i] = nullptr;
 
@@ -1044,10 +1044,14 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			xStart = x * (nBlockWidth - 1);
 			zStart = z * (nBlockLength - 1);
 			pHeightMapGridMesh = new CHeightMapGridMesh(pd3dDevice, pd3dCommandList, xStart, zStart, nBlockWidth, nBlockLength, xmf3Scale, xmf4Color, m_pHeightMapImage);
-			SetMesh(x + (z * cxBlocks), pHeightMapGridMesh);
+			SetMesh(x + (z * cxBlocks) + 1, pHeightMapGridMesh);
 		}
 	}
 
+	//CTexturedRectMesh* terrainFloorMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10000.0f, 0.0f, 10000.0f, 1000.0f, 1000.0f);
+	pHeightMapGridMesh = new CHeightMapGridMesh(pd3dDevice, pd3dCommandList, 0, 0, 2, 2, xmf3Scale);
+	SetMesh(0, pHeightMapGridMesh);
+	
 	CTexture* pTerrainTexture = new CTexture(4, RESOURCE_TEXTURE2D, 0, 1);
 
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Dirt_2_Diffuse.dds", RESOURCE_TEXTURE2D, 0);

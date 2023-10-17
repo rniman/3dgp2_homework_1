@@ -161,6 +161,7 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 	virtual D3D12_BLEND_DESC CreateBlendState();
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
 
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
@@ -171,6 +172,8 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
 
 	virtual void ReleaseUploadBuffers();
+
+	void SortObjectsByDistance() {}; // 후에 투명한 오브젝트를 정렬해야함
 
 private:
 	CGameObject**	m_ppObjects = nullptr;
