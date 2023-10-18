@@ -152,10 +152,16 @@
     <FxCompile Include="PSSkyBox.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="VSFloor.hlsl">
+    <FxCompile Include="VSOcean.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="PSFloor.hlsl">
+    <FxCompile Include="PSOcean.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="VSTextured.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="PSTextured.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

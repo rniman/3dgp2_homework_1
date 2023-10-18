@@ -547,6 +547,15 @@ void CGameObject::SetScale(float x, float y, float z)
 	m_xmf4x4Local = Matrix4x4::Multiply(mtxScale, m_xmf4x4Local);
 }
 
+void CGameObject::SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up)
+{
+	XMFLOAT3 xmf3Position(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43);
+	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(xmf3Position, xmf3Target, xmf3Up);
+	m_xmf4x4Local._11 = mtxLookAt._11; m_xmf4x4Local._12 = mtxLookAt._21; m_xmf4x4Local._13 = mtxLookAt._31;
+	m_xmf4x4Local._21 = mtxLookAt._12; m_xmf4x4Local._22 = mtxLookAt._22; m_xmf4x4Local._23 = mtxLookAt._32;
+	m_xmf4x4Local._31 = mtxLookAt._13; m_xmf4x4Local._32 = mtxLookAt._23; m_xmf4x4Local._33 = mtxLookAt._33;
+}
+
 XMFLOAT3 CGameObject::GetPosition()
 {
 	return(XMFLOAT3(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43));
@@ -1078,13 +1087,13 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CFloorObjcet::CFloorObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+COceanObjcet::COceanObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 	: CGameObject(1, 1)
 {
 	float terrainSize = 2048.0f * 2.5f;
 
-	CTexturedRectMesh* pTextureRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, terrainSize * 3, 0.0f, terrainSize * 3, 10.0f, 10.0f);
-	SetMesh(0, pTextureRectMesh);
+	CTexturedRectMesh* pOceanRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, terrainSize * 3, 0.0f, terrainSize * 3, 10.0f, 10.0f);
+	SetMesh(0, pOceanRectMesh);
 
 	CTexture* pTestTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	//pTestTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Skybox/Water_Base_Texture_0.dds", RESOURCE_TEXTURE2D, 0);
@@ -1101,11 +1110,11 @@ CFloorObjcet::CFloorObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	
 }
 
-CFloorObjcet::~CFloorObjcet()
+COceanObjcet::~COceanObjcet()
 {
 }
 
-void CFloorObjcet::Animate(float fTimeElapsed)
+void COceanObjcet::Animate(float fTimeElapsed)
 {
 	//if(m_pPlayer)
 	//{
@@ -1114,7 +1123,7 @@ void CFloorObjcet::Animate(float fTimeElapsed)
 	//}
 }
 
-void CFloorObjcet::SetPlayer(CPlayer* pPlayer)
+void COceanObjcet::SetPlayer(CPlayer* pPlayer)
 {
 	m_pPlayer = pPlayer;
 }

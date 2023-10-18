@@ -191,6 +191,7 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
+	void SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up);
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -332,11 +333,11 @@ private:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CFloorObjcet :public CGameObject
+class COceanObjcet :public CGameObject
 {
 public:
-	CFloorObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
-	virtual ~CFloorObjcet();
+	COceanObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
+	virtual ~COceanObjcet();
 
 	virtual void Animate(float fTimeElapsed);
 
@@ -344,4 +345,13 @@ public:
 
 private:
 	CPlayer* m_pPlayer = nullptr;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CBillboardObject : public CGameObject
+{
+public:
+	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
 };

@@ -51,14 +51,6 @@ Texture2D gtxtEmissionTexture : register(t4);
 Texture2D gtxtDetailAlbedoTexture : register(t5);
 Texture2D gtxtDetailNormalTexture : register(t6);
 
-//Texture2D gtxtAlbedoTexture : register(t6);
-//Texture2D gtxtSpecularTexture : register(t7);
-//Texture2D gtxtNormalTexture : register(t8);
-//Texture2D gtxtMetallicTexture : register(t9);
-//Texture2D gtxtEmissionTexture : register(t10);
-//Texture2D gtxtDetailAlbedoTexture : register(t11);
-//Texture2D gtxtDetailNormalTexture : register(t12);
-
 #include "Light.hlsl"
 
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
@@ -91,6 +83,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
         cIllumination = Lighting(input.positionW, normalW);
         cColor = lerp(cColor, cIllumination, 0.5f);
     }
+
 
     return (cColor);
 }
