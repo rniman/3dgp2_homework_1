@@ -234,7 +234,7 @@ protected:
 class CRawFormatImage
 {
 public:
-	CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, bool bFlipY = false);
+	CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, bool bFlipY = false, int nPixelNum = 1);
 	~CRawFormatImage(void);
 
 	// interface
@@ -256,7 +256,7 @@ protected:
 class CHeightMapImage : public CRawFormatImage
 {
 public:
-	CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale);
+	CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, bool bFlipY = true, int nPixelNum = 1);
 	~CHeightMapImage(void);
 
 	// interface

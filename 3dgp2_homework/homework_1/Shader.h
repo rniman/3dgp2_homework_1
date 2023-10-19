@@ -185,7 +185,7 @@ private:
 class CBillBoardObjectsShader : public CShader
 {
 public:
-	CBillBoardObjectsShader();
+	CBillBoardObjectsShader(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale);
 	~CBillBoardObjectsShader();
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
@@ -206,4 +206,6 @@ public:
 private:
 	CGameObject** m_ppObjects = nullptr;
 	int				m_nObjects = 0;
+
+	CHeightMapImage* m_pHeightMapImage = nullptr;
 };

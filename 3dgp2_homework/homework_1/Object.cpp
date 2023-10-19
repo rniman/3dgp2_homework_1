@@ -1025,7 +1025,7 @@ void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color)
+CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, int nPixelNum)
 	: CGameObject(0, 1)
 {
 	m_nWidth = nWidth;
@@ -1036,7 +1036,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	m_xmf3Scale = xmf3Scale;
 
-	m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, xmf3Scale);
+	m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, xmf3Scale, nPixelNum);
 
 	long cxBlocks = (m_nWidth - 1) / cxQuadsPerBlock;
 	long czBlocks = (m_nLength - 1) / czQuadsPerBlock;
@@ -1063,7 +1063,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	
 	CTexture* pTerrainTexture = new CTexture(4, RESOURCE_TEXTURE2D, 0, 1);
 
-	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Dirt_2_Diffuse.dds", RESOURCE_TEXTURE2D, 0);
+	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/1024x1024_Dirt_2_Diffuse.dds", RESOURCE_TEXTURE2D, 0);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/3DH FTT Dirt_001 512.dds", RESOURCE_TEXTURE2D, 1);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Base_Texture.dds", RESOURCE_TEXTURE2D, 2);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/HeightMap(Alpha).dds", RESOURCE_TEXTURE2D, 3);

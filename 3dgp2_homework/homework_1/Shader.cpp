@@ -757,13 +757,31 @@ void CTransparentOjectsShader::ReleaseUploadBuffers()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CBillBoardObjectsShader::CBillBoardObjectsShader()
+CBillBoardObjectsShader::CBillBoardObjectsShader(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale)
 {
-	m_nObjects = 1;
+	m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, xmf3Scale, true);
+
+	int nGrassObjects = 0;
+	for (int x = 0; x < nWidth; x++)
+	{
+		for (int z = 0; z < nLength; z++)
+		{
+			BYTE nPixel = m_pHeightMapImage->GetRawImagePixel(x, z);
+			switch (nPixel)
+			{
+			case 255: nGrassObjects++; break;
+			default: break;
+			}
+		}
+	}
+	//m_nObjects = nGrassObjects;
+
+	m_nObjects = 10;
 }
 
 CBillBoardObjectsShader::~CBillBoardObjectsShader()
 {
+	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
 
 D3D12_INPUT_LAYOUT_DESC CBillBoardObjectsShader::CreateInputLayout()
@@ -834,20 +852,65 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 {
 	m_ppObjects = new CGameObject*[m_nObjects];
 	
-	CTexturedRectMesh* textureMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1000.0f, 1000.0f, 0.0f);
+	CTexturedRectMesh* textureMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 100.0f, 100.0f, 0.0f);
 	CTexture* pTestTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Tree01.dds", RESOURCE_TEXTURE2D, 0);
+	pTestTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Grass01.dds", RESOURCE_TEXTURE2D, 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture, 0, 3);
-
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 	CMaterial* pTestMaterial = new CMaterial();
 	pTestMaterial->SetTexture(pTestTexture);
+	
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
-	m_ppObjects[0] = new CGameObject(1, 1);
-	m_ppObjects[0]->SetMesh(0, textureMesh);
-	m_ppObjects[0]->SetMaterial(0, pTestMaterial);
-	m_ppObjects[0]->SetPosition(0.0f, 100.0f, 0.0f);
+	XMFLOAT3 scale = pTerrain->GetScale();
+	float width = m_pHeightMapImage->GetRawImageWidth();
+	float length = m_pHeightMapImage->GetRawImageLength();
+	
+	for (int i = 0, x = 0; x < width; ++x)
+	{
+		for (int z = 0; z < length; ++z)
+		{
+			CMaterial* pMaterial = NULL;
+			CMesh* pMesh = NULL;
+			float fyOffset;
+			switch (m_pHeightMapImage->GetRawImagePixel(x,z))
+			{
+			case 255:
+				pMesh = textureMesh;
+				pMaterial = pTestMaterial;
+				fyOffset = 10.0f * 0.5f;
+				break;
+			default:
+				break;
+			}
+
+			if (pMesh && pMaterial)
+			{
+				m_ppObjects[i] = new CGameObject(1, 1);
+
+				m_ppObjects[i]->SetMesh(0, pMesh);
+				m_ppObjects[i]->SetMaterial(0, pMaterial);
+
+				float xPosition = x * scale.x;
+				float zPosition = z * scale.z;
+				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+				m_ppObjects[i++]->SetPosition(xPosition, fHeight + fyOffset, zPosition);
+				//pBillboardObject->SetCbvGPUDescriptorHandlePtr(d3dCbvGPUDescriptorNextHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+			}
+
+			if (i == 10)
+				break;
+		}
+
+		if (i == 10)
+			break;
+	}
+
+	//m_ppObjects[0] = new CGameObject(1, 1);
+	//m_ppObjects[0]->SetMesh(0, textureMesh);
+	//m_ppObjects[0]->SetMaterial(0, pTestMaterial);
+	//m_ppObjects[0]->SetPosition(0.0f, 100.0f, 0.0f);
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -856,7 +919,13 @@ void CBillBoardObjectsShader::ReleaseObjects()
 {
 	if (m_ppObjects)
 	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Release();
+		for (int j = 0; j < m_nObjects; j++) 
+		{
+			if (m_ppObjects[j]) 
+			{
+				m_ppObjects[j]->Release();
+			}
+		}
 		delete[] m_ppObjects;
 	}
 }

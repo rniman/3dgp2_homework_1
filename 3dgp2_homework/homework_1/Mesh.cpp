@@ -639,26 +639,26 @@ void CStandardMesh::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
-CRawFormatImage::CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, bool bFlipY)
+CRawFormatImage::CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, bool bFlipY, int nPixelNum)
 {
 	m_nWidth = nWidth;
 	m_nLength = nLength;
 
-	BYTE* pRawImagePixels = new BYTE[m_nWidth * m_nLength];
+	BYTE* pRawImagePixels = new BYTE[m_nWidth * m_nLength * nPixelNum];
 
 	HANDLE hFile = ::CreateFile(pFileName, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY, nullptr);
 	DWORD dwBytesRead;
-	::ReadFile(hFile, pRawImagePixels, (m_nWidth * m_nLength), &dwBytesRead, nullptr);
+	::ReadFile(hFile, pRawImagePixels, (m_nWidth * m_nLength * nPixelNum), &dwBytesRead, nullptr);
 	::CloseHandle(hFile);
 
 	if (bFlipY)
 	{
-		m_pRawImagePixels = new BYTE[m_nWidth * m_nLength];
+		m_pRawImagePixels = new BYTE[m_nWidth * m_nLength * nPixelNum];
 		for (int z = 0; z < m_nLength; z++)
 		{
 			for (int x = 0; x < m_nWidth; x++)
 			{
-				m_pRawImagePixels[x + ((m_nLength - 1 - z) * m_nWidth)] = pRawImagePixels[x + (z * m_nWidth)];
+				m_pRawImagePixels[x + ((m_nLength - 1 - z) * m_nWidth)] = pRawImagePixels[ nPixelNum * (x + (z * m_nWidth))];
 			}
 		}
 
@@ -670,13 +670,16 @@ CRawFormatImage::CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, boo
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 CRawFormatImage::~CRawFormatImage()
 {
 	if (m_pRawImagePixels) delete[] m_pRawImagePixels;
 	m_pRawImagePixels = nullptr;
 }
 
-CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale) : CRawFormatImage(pFileName, nWidth, nLength, true)
+CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, bool bFlipY, int nPixelNum)
+	: CRawFormatImage(pFileName, nWidth, nLength, bFlipY)
 {
 	m_xmf3Scale = xmf3Scale;
 }
@@ -772,15 +775,10 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	if (pContext == nullptr)
 	{
-		//m_pxmf3Positions[0] = XMFLOAT3((1.0f * m_xmf3Scale.x / 2) + 1024.0f, 100.0f, (-1.0f * m_xmf3Scale.z / 2) + 1024.0f);
-		//m_pxmf3Positions[1] = XMFLOAT3((1.0f * m_xmf3Scale.x / 2) + 1024.0f, 100.0f, (1.0f * m_xmf3Scale.z / 2) + 1024.0f);
-		//m_pxmf3Positions[2] = XMFLOAT3((-1.0f * m_xmf3Scale.x / 2) + 1024.0f, 100.0f, (-1.0f * m_xmf3Scale.z / 2) + 1024.0f);
-		//m_pxmf3Positions[3] = XMFLOAT3((-1.0f * m_xmf3Scale.x / 2) + 1024.0f, 100.0f, (1.0f * m_xmf3Scale.z / 2) + 1024.0f);
-
-		m_pxmf3Positions[0] = XMFLOAT3(((2048.0f + 2048.0f) * m_xmf3Scale.x), 100.0f, (((0.0f - 2048.0f) * m_xmf3Scale.z)));
-		m_pxmf3Positions[1] = XMFLOAT3(((2048.0f + 2048.0f) * m_xmf3Scale.x), 100.0f, (((2048.0f + 2048.0f) * m_xmf3Scale.z)));
-		m_pxmf3Positions[2] = XMFLOAT3(((0.0f - 2048.0f) * m_xmf3Scale.x), 100.0f, (((0.0f - 2048.0f) * m_xmf3Scale.z)));
-		m_pxmf3Positions[3] = XMFLOAT3(((0.0f - 2048.0f) * m_xmf3Scale.x), 100.0f, (((2048.0f + 2048.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[0] = XMFLOAT3(((1024.0f + 1024.0f) * m_xmf3Scale.x), 100.0f, (((0.0f - 1024.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[1] = XMFLOAT3(((1024.0f + 1024.0f) * m_xmf3Scale.x), 100.0f, (((1024.0f + 1024.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[2] = XMFLOAT3(((0.0f - 1024.0f) * m_xmf3Scale.x), 100.0f, (((0.0f - 1024.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[3] = XMFLOAT3(((0.0f - 1024.0f) * m_xmf3Scale.x), 100.0f, (((1024.0f + 1024.0f) * m_xmf3Scale.z)));
 
 		m_pxmf4Colors[0] = xmf4Color;
 		m_pxmf4Colors[1] = xmf4Color;
@@ -798,11 +796,6 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		
 		m_pxmf2TextureCoords0[3] = XMFLOAT2(-1.0f, -1.0f);
 		m_pxmf2TextureCoords1[3] = XMFLOAT2(0.0f / float(m_xmf3Scale.x * 0.5f), 0.0f / float(m_xmf3Scale.z * 0.5f));
-
-
-
-
-
 	}
 	else
 	{

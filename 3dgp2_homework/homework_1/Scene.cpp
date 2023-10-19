@@ -201,9 +201,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 
-	XMFLOAT3 xmf3Scale(2.5f, 6.0f, 2.5f);
+	XMFLOAT3 xmf3Scale(5.0f, 6.0f, 5.0f);
+	//XMFLOAT3 xmf3Scale(2.5f, 6.0f, 2.5f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/terrain.raw"), 2049, 2049, 2049, 2049, xmf3Scale, xmf4Color);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/terrain.raw"), 1025, 1025, 1025, 1025, xmf3Scale, xmf4Color);
+	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/billboard_pos.raw"), 2049, 2049, 2049, 2049, xmf3Scale, xmf4Color, 1);
 
 	m_nShaders = 3;
 	m_ppShaders = new CShader*[m_nShaders];
@@ -212,9 +214,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), nullptr);
 	
-	CBillBoardObjectsShader* pBillboardObjectsShader = new CBillBoardObjectsShader();
+	CBillBoardObjectsShader* pBillboardObjectsShader = new CBillBoardObjectsShader(L"Terrain/billboard_pos.raw", m_pTerrain->GetRawImageWidth(), m_pTerrain->GetRawImageLength(), m_pTerrain->GetScale());
 	pBillboardObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
-	pBillboardObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), nullptr);
+	pBillboardObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pTerrain);
 
 	CTransparentOjectsShader* pTransparentObjectsShader = new CTransparentOjectsShader();
 	pTransparentObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
