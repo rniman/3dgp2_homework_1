@@ -204,7 +204,7 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 private:
-	CGameObject** m_ppObjects = nullptr;
+	CGameObject**	m_ppObjects = nullptr;
 	int				m_nObjects = 0;
 
 	CHeightMapImage* m_pHeightMapImage = nullptr;

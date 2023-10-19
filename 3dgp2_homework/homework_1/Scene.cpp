@@ -191,7 +191,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_pDescriptorHeap = new CDescriptorHeap();
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 3 + 8 + 1 + 1 + 4 + 1); //SuperCobra(17), Gunship(3), , Mi24(1), Skybox(1), Terrain(4), Floor
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 8 + 1 + 1 + 4 + 1 + 5); //SuperCobra(17), Player?(8), Mi24(1), Skybox(1), Terrain(4), Water(1), billboard(5)//// Gunship(3)
 
 	CHelicopterPlayer* pAirplanePlayer = new CHelicopterPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -201,10 +201,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 
-	XMFLOAT3 xmf3Scale(5.0f, 6.0f, 5.0f);
+	XMFLOAT3 xmf3Scale(10.0f, 6.0f, 10.0f);
 	//XMFLOAT3 xmf3Scale(2.5f, 6.0f, 2.5f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/terrain.raw"), 1025, 1025, 1025, 1025, xmf3Scale, xmf4Color);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/terrain.raw"), 513, 513, 513, 513, xmf3Scale, xmf4Color);
+	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/512x512_terrain.raw"), 513, 513, 513, 513, xmf3Scale, xmf4Color);
 	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/billboard_pos.raw"), 2049, 2049, 2049, 2049, xmf3Scale, xmf4Color, 1);
 
 	m_nShaders = 3;
@@ -214,7 +215,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), nullptr);
 	
-	CBillBoardObjectsShader* pBillboardObjectsShader = new CBillBoardObjectsShader(L"Terrain/billboard_pos.raw", m_pTerrain->GetRawImageWidth(), m_pTerrain->GetRawImageLength(), m_pTerrain->GetScale());
+	CBillBoardObjectsShader* pBillboardObjectsShader = new CBillBoardObjectsShader(L"Terrain/512x512_billboard_pos.raw", m_pTerrain->GetRawImageWidth(), m_pTerrain->GetRawImageLength(), m_pTerrain->GetScale());
 	pBillboardObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pBillboardObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pTerrain);
 

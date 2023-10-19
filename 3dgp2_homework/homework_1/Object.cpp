@@ -1090,7 +1090,7 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 COceanObjcet::COceanObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 	: CGameObject(1, 1)
 {
-	float terrainSize = 2048.0f * 2.5f;
+	float terrainSize = 512.0f * 10.0f;
 
 	CTexturedRectMesh* pOceanRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, terrainSize * 3, 0.0f, terrainSize * 3, 10.0f, 10.0f);
 	SetMesh(0, pOceanRectMesh);
@@ -1104,7 +1104,7 @@ COceanObjcet::COceanObjcet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pTestMaterial->SetTexture(pTestTexture);
 	SetMaterial(0, pTestMaterial);
 
-	SetPosition(terrainSize / 2, 200.0f, terrainSize / 2);
+	SetPosition(terrainSize / 2, 150.0f, terrainSize / 2);
 
 	SetPlayer((CPlayer*)pContext);
 	

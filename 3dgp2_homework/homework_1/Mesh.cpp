@@ -775,10 +775,10 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	if (pContext == nullptr)
 	{
-		m_pxmf3Positions[0] = XMFLOAT3(((1024.0f + 1024.0f) * m_xmf3Scale.x), 100.0f, (((0.0f - 1024.0f) * m_xmf3Scale.z)));
-		m_pxmf3Positions[1] = XMFLOAT3(((1024.0f + 1024.0f) * m_xmf3Scale.x), 100.0f, (((1024.0f + 1024.0f) * m_xmf3Scale.z)));
-		m_pxmf3Positions[2] = XMFLOAT3(((0.0f - 1024.0f) * m_xmf3Scale.x), 100.0f, (((0.0f - 1024.0f) * m_xmf3Scale.z)));
-		m_pxmf3Positions[3] = XMFLOAT3(((0.0f - 1024.0f) * m_xmf3Scale.x), 100.0f, (((1024.0f + 1024.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[0] = XMFLOAT3(((512.0f + 512.0f) * m_xmf3Scale.x), 80.0f, (((0.0f - 512.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[1] = XMFLOAT3(((512.0f + 512.0f) * m_xmf3Scale.x), 80.0f, (((512.0f + 512.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[2] = XMFLOAT3(((0.0f - 512.0f) * m_xmf3Scale.x), 80.0f, (((0.0f - 512.0f) * m_xmf3Scale.z)));
+		m_pxmf3Positions[3] = XMFLOAT3(((0.0f - 512.0f) * m_xmf3Scale.x), 80.0f, (((512.0f + 512.0f) * m_xmf3Scale.z)));
 
 		m_pxmf4Colors[0] = xmf4Color;
 		m_pxmf4Colors[1] = xmf4Color;
