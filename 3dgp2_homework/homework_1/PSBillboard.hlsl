@@ -1,15 +1,15 @@
-struct VS_TEXTURED_INPUT
+struct GS_Billboard_Output
 {
-    float3 position : POSITION;
+    float4 posH : SV_POSITION;
+    float3 posW : POSITION;
+    float3 normalW : NORMAL;
     float2 uv : TEXCOORD;
-    float4x4 mtxTransform : WORLDMATRIX;
+    //uint primID : SV_PrimitiveID;
 };
 
-struct VS_TEXTURED_OUTPUT
-{
-    float4 position : SV_POSITION;
-    float2 uv : TEXCOORD;
-};
+Texture2D gtxtTexture : register(t0);
+
+SamplerState gWrapSamplerState : register(s0);
 
 struct MATERIAL
 {
@@ -34,12 +34,11 @@ cbuffer cbGameObjectInfo : register(b2)
     uint gnTexturesMask : packoffset(c8);
 };
 
-VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
+//#include "Light.hlsl"
+
+float4 PSBillboard(GS_Billboard_Output input) : SV_TARGET
 {
-    VS_TEXTURED_OUTPUT output;
+    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
 
-    output.position = mul(mul(mul(float4(input.position, 1.0f), input.mtxTransform), gmtxView), gmtxProjection);
-    output.uv = input.uv;
-
-    return (output);
+    return (cColor);
 }

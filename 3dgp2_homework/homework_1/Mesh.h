@@ -20,6 +20,21 @@
 #define VERTEXT_NORMAL_DETAIL			(VERTEXT_POSITION | VERTEXT_NORMAL | VERTEXT_TEXTURE_COORD0 | VERTEXT_TEXTURE_COORD1)
 #define VERTEXT_NORMAL_TANGENT__DETAIL	(VERTEXT_POSITION | VERTEXT_NORMAL | VERTEXT_TANGENT | VERTEXT_TEXTURE_COORD0 | VERTEXT_TEXTURE_COORD1)
 
+class CTreeVertex
+{
+public:
+	CTreeVertex();
+	CTreeVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size)
+		: m_xmf3Position{ xmf3Position }
+		, m_xmf2Size{ xmf2Size }
+	{}
+	~CTreeVertex();
+
+	XMFLOAT3 m_xmf3Position;
+	XMFLOAT2 m_xmf2Size;
+
+};
+
 //
 class CVertex
 {
@@ -109,6 +124,7 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
 
 	// interface
 	UINT GetType() const { return(m_nType); }
@@ -163,6 +179,22 @@ public:
 	virtual ~CSkyBoxMesh();
 };
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CBillboardMesh : public CMesh
+{
+	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nBillboard);
+	~CBillboardMesh();
+
+protected:
+	XMFLOAT2* m_pxmf2TextureCoords0 = nullptr;
+
+	ComPtr<ID3D12Resource>			m_pd3dTextureCoord0Buffer;
+	ComPtr<ID3D12Resource>			m_pd3dTextureCoord0UploadBuffer;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dTextureCoord0BufferView;
+};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CTexturedRectMesh : public CMesh
@@ -174,7 +206,9 @@ public:
 	virtual ~CTexturedRectMesh();
 
 	virtual void ReleaseUploadBuffers();
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubset);
+	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
+	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances);
 
 protected:
 	XMFLOAT2						*m_pxmf2TextureCoords0 = nullptr;
@@ -306,3 +340,4 @@ protected:
 	ComPtr<ID3D12Resource>		m_pd3dTextureCoord1UploadBuffer;
 	D3D12_VERTEX_BUFFER_VIEW	m_d3dTextureCoord1BufferView;
 };
+

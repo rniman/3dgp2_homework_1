@@ -174,6 +174,7 @@ public:
 
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
+	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
@@ -188,6 +189,7 @@ public:
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
 	XMFLOAT4X4 GetLocalTransform() const;
+	XMFLOAT4X4 GetWorldTransform() const;
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
@@ -354,5 +356,5 @@ class CBillboardObject : public CGameObject
 {
 public:
 	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-
+	~CBillboardObject();
 };

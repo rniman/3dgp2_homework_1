@@ -486,6 +486,52 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
+void CGameObject::RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView)
+{
+	OnPrepareRender();
+
+	UpdateShaderVariable(pd3dCommandList);
+
+	if (m_nMaterials > 1)
+	{
+		for (int i = 0; i < m_nMaterials; i++)
+		{
+			if (m_ppMaterials[i])
+			{
+				if (m_ppMaterials[i]->m_pShader)
+				{
+					m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+				}
+				m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
+			}
+
+			if (m_nMeshes == 1)
+			{
+				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i);
+			}
+		}
+	}
+	else
+	{
+		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+		{
+			if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
+			m_ppMaterials[0]->UpdateShaderVariables(pd3dCommandList);
+		}
+
+		if (m_ppMeshes)
+		{
+			for (int i = 0; i < m_nMeshes; i++)
+			{
+				if (m_ppMeshes[i]) m_ppMeshes[i]->RenderInstance(pd3dCommandList, nInstances, d3dInstancingBufferView);
+			}
+		}
+	}
+
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+}
+
 void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 }
@@ -579,6 +625,11 @@ XMFLOAT3 CGameObject::GetRight()
 XMFLOAT4X4 CGameObject::GetLocalTransform() const
 {
 	return m_xmf4x4Local;
+}
+
+XMFLOAT4X4 CGameObject::GetWorldTransform() const
+{
+	return m_xmf4x4World;
 }
 
 void CGameObject::MoveStrafe(float fDistance)

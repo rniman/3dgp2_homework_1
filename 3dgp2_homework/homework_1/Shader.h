@@ -182,6 +182,11 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct VS_VB_INSTANCE
+{
+	XMFLOAT4X4 m_xmf4x4Transform;
+};
+
 class CBillBoardObjectsShader : public CShader
 {
 public:
@@ -194,6 +199,9 @@ public:
 	virtual D3D12_BLEND_DESC CreateBlendState();
 
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
 	virtual void ReleaseObjects();
@@ -208,4 +216,9 @@ private:
 	int				m_nObjects = 0;
 
 	CHeightMapImage* m_pHeightMapImage = nullptr;
+
+	//인스턴스 정점 버퍼와 정점 버퍼 뷰이다. 
+	ID3D12Resource* m_pd3dcbGameObjects = nullptr;
+	VS_VB_INSTANCE* m_pcbMappedGameObjects = nullptr;
+	D3D12_VERTEX_BUFFER_VIEW m_d3dInstancingBufferView;
 };
