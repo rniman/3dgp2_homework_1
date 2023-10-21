@@ -218,6 +218,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CBillBoardObjectsShader* pBillboardObjectsShader = new CBillBoardObjectsShader(L"Terrain/512x512_billboard_pos.raw", m_pTerrain->GetRawImageWidth(), m_pTerrain->GetRawImageLength(), m_pTerrain->GetScale());
 	pBillboardObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pBillboardObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pTerrain);
+	pBillboardObjectsShader->SetCamera(m_pPlayer->GetCamera());
 
 	CTransparentOjectsShader* pTransparentObjectsShader = new CTransparentOjectsShader();
 	pTransparentObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());

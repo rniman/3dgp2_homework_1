@@ -124,7 +124,7 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
-	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
+	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView, int nStartInstance);
 
 	// interface
 	UINT GetType() const { return(m_nType); }
@@ -207,8 +207,8 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubset);
-	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
-	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances);
+	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView, int nStartInstance);
+	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, int nStartInstance);
 
 protected:
 	XMFLOAT2						*m_pxmf2TextureCoords0 = nullptr;

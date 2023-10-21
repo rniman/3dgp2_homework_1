@@ -64,13 +64,13 @@ void CMesh::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
 	}
 }
 
-void CMesh::RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView)
+void CMesh::RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView, int nStartInstance)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dVertexBufferView);
 
-	pd3dCommandList->DrawInstanced(m_nVertices, nInstances, m_nOffset, 0);
+	pd3dCommandList->DrawInstanced(m_nVertices, nInstances, m_nOffset, nStartInstance);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,18 +214,18 @@ void CTexturedRectMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int n
 	pd3dCommandList->DrawInstanced(m_nVertices, nSubset, m_nOffset, 0);
 }
 
-void CTexturedRectMesh::RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView)
+void CTexturedRectMesh::RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView, int nStartInstance)
 {
-	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[] = { m_d3dVertexBufferView, d3dInstancingBufferView };
+	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[] = { m_d3dVertexBufferView, m_d3dTextureCoord0BufferView, d3dInstancingBufferView };
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, _countof(pVertexBufferViews), pVertexBufferViews);
-	RenderInstance(pd3dCommandList, nInstances);
+	RenderInstance(pd3dCommandList, nInstances, nStartInstance);
 }
 
-void CTexturedRectMesh::RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances)
+void CTexturedRectMesh::RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, int nStartInstance)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 
-	pd3dCommandList->DrawInstanced(m_nVertices, nInstances, m_nOffset, 0);
+	pd3dCommandList->DrawInstanced(m_nVertices, nInstances, m_nOffset, nStartInstance);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

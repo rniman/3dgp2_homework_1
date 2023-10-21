@@ -174,7 +174,7 @@ public:
 
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
-	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
+	virtual void RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView, int nStartInstance);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();

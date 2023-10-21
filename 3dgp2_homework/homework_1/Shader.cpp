@@ -775,12 +775,12 @@ D3D12_INPUT_LAYOUT_DESC CBillBoardObjectsShader::CreateInputLayout()
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
-	pd3dInputElementDescs[2] = { "WORLDMATRIX", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[3] = { "WORLDMATRIX", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16,D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[4] = { "WORLDMATRIX", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32,D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[5] = { "WORLDMATRIX", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48,D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[2] = { "WORLDMATRIX", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[3] = { "WORLDMATRIX", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 16,D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[4] = { "WORLDMATRIX", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 32,D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[5] = { "WORLDMATRIX", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 48,D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
@@ -850,11 +850,15 @@ void CBillBoardObjectsShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID
 
 void CBillBoardObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int j = 0; j < m_nObjects; j++)
+	for (int i = 0, j = 0; j < m_nObjectsType; j++)
 	{
-		//m_ppObjects[j]->SetLookAt(pCamera->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
-		m_ppObjects[j]->UpdateTransform();
-		XMStoreFloat4x4(&m_pcbMappedGameObjects[j].m_xmf4x4Transform, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->GetWorldTransform())));
+		for (auto& gameObject : m_ppObjects[j])
+		{
+			gameObject.SetLookAt(m_pCamera->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+			gameObject.UpdateTransform();
+			XMStoreFloat4x4(&m_pcbMappedGameObjects[i++].m_xmf4x4Transform, XMMatrixTranspose(XMLoadFloat4x4(&gameObject.GetWorldTransform())));
+		}
+		//XMStoreFloat4x4(&m_pcbMappedGameObjects[j].m_xmf4x4Transform, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->GetWorldTransform())));
 	}
 }
 
@@ -893,12 +897,15 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 			}
 		}
 	}
-	m_nObjects = nGrassObjects;
-	CGameObject** ppObjects = new CGameObject*[m_nObjects];
-	
+	m_nObjectsType = 5;
+
+	//std::vector<std::vector<CGameObject>> ppObjects(5);	
+	m_ppObjects.resize(m_nObjectsType);
+	for (auto& gameObject : m_ppObjects)
+		gameObject.reserve(nGrassObjects / 5);
 	
 	CTexturedRectMesh* grassMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 0.0f);
-	//CTexturedRectMesh* treeMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 120.0f, 120.0f, 0.0f);
+	CTexturedRectMesh* treeMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 120.0f, 120.0f, 0.0f);
 
 	CTexture* pTestTexture[5];
 	pTestTexture[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -939,33 +946,38 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	{
 		for (int z = 0; z < length; ++z)
 		{
-			CMaterial* pMaterial = NULL;
 			CMesh* pMesh = NULL;
+			int nMaterialType;
 			float fyOffset;
 			switch (m_pHeightMapImage->GetRawImagePixel(x,z))
 			{
 			case 255:
-				if (random_int(dre) < 95)
+				if (random_int(dre) < 80)
 					continue;
 				
 				nTypeDryTexture = random_int(dre);
 				if (nTypeDryTexture < 5)
 				{
-					//pMesh = treeMesh;
-					pMesh = grassMesh;
-					pMaterial = pTestMaterial[3];
+					pMesh = treeMesh;
+					nMaterialType = 3;
 					fyOffset = 120.0f * 0.15f;
+				}
+				else if (nTypeDryTexture < 10)
+				{
+					pMesh = grassMesh;
+					nMaterialType = 4;
+					fyOffset = 120.0f * 0.25f;
 				}
 				else if (nTypeDryTexture < 50)
 				{
 					pMesh = grassMesh;
-					pMaterial = pTestMaterial[1];
+					nMaterialType = 1;
 					fyOffset = -10.0f * 0.01f;
 				}
 				else
 				{
 					pMesh = grassMesh;
-					pMaterial = pTestMaterial[2];
+					nMaterialType = 2;
 					fyOffset = 10.0f * 0.3f;
 				}
 				break;
@@ -973,7 +985,7 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				if (random_int(dre) < 80)
 					continue;
 				pMesh = grassMesh;
-				pMaterial = pTestMaterial[0];
+				nMaterialType = 0;
 				fyOffset = 10.0f * 0.3f;
 				break;
 			case 131:
@@ -983,22 +995,20 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				nTypeDryTexture = random_int(dre);
 				if (nTypeDryTexture < 20)
 				{
-					//pMesh = treeMesh;
-					pMesh = grassMesh;
-					pMaterial = pTestMaterial[3];
+					pMesh = treeMesh;
+					nMaterialType = 3;
 					fyOffset = 120.0f * 0.15f;
 				}
 				else if (nTypeDryTexture < 40)
 				{
-					//pMesh = treeMesh;
-					pMesh = grassMesh;
-					pMaterial = pTestMaterial[4];
+					pMesh = treeMesh;
+					nMaterialType = 4;
 					fyOffset = 120.0f * 0.25f;
 				}
 				else
 				{
 					pMesh = grassMesh;
-					pMaterial = pTestMaterial[2];
+					nMaterialType = 2;
 					fyOffset = 10.0f * 0.3f;
 				}
 				break;
@@ -1006,58 +1016,48 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				if (random_int(dre) < 75)
 					continue;
 				pMesh = grassMesh;
-				pMaterial = pTestMaterial[0];
+				nMaterialType = 0;
 				fyOffset = 10.0f * 0.4f;
 				break;
 			default:
 				break;
 			}
 
-			if (pMesh && pMaterial)
+			if (pMesh)
 			{
-				ppObjects[i] = new CGameObject(1, 1);
-
-				ppObjects[i]->SetMesh(0, pMesh);
-				ppObjects[i]->SetMaterial(0, pMaterial);
-
 				float xPosition = x * scale.x;
 				float zPosition = z * scale.z;
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-				ppObjects[i++]->SetPosition(xPosition, fHeight + fyOffset, zPosition);
+				
+				m_ppObjects[nMaterialType].emplace_back(1,1);
+				m_ppObjects[nMaterialType].rbegin()->SetMesh(0, pMesh);
+				m_ppObjects[nMaterialType].rbegin()->SetMaterial(0, pTestMaterial[nMaterialType]);
+				m_ppObjects[nMaterialType].rbegin()->SetPosition(xPosition, fHeight + fyOffset, zPosition);
 			}
 		}
 	}
 
-	if (m_ppObjects) {
-		for (int i = 0; i < m_nObjects; i++) {
-			delete m_ppObjects[i];
-		}
-		delete[] m_ppObjects;
+	for (auto& objects : m_ppObjects)
+	{
+		m_nObjects += objects.size();
 	}
-
-	m_nObjects = i;
-	m_ppObjects = new CGameObject* [m_nObjects];
-	m_ppObjects = ppObjects;
-
-	ppObjects = nullptr;
-	delete[] ppObjects;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CBillBoardObjectsShader::ReleaseObjects()
 {
-	if (m_ppObjects)
-	{
-		for (int j = 0; j < m_nObjects; j++) 
-		{
-			if (m_ppObjects[j]) 
-			{
-				m_ppObjects[j]->Release();
-			}
-		}
-		delete[] m_ppObjects;
-	}
+	//if (m_ppObjects)
+	//{
+	//	for (int j = 0; j < m_nObjects; j++) 
+	//	{
+	//		if (m_ppObjects[j]) 
+	//		{
+	//			m_ppObjects[j]->Release();
+	//		}
+	//	}
+	//	delete[] m_ppObjects;
+	//}
 }
 
 void CBillBoardObjectsShader::AnimateObjects(float fTimeElapsed)
@@ -1071,22 +1071,18 @@ void CBillBoardObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList,
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	m_ppObjects[0]->RenderInstance(pd3dCommandList, pCamera, m_nObjects, m_d3dInstancingBufferView);
-	//for (int j = 0; j < m_nObjects; j++)
-	//{
-	//	if (m_ppObjects[j])
-	//	{
-	//		m_ppObjects[j]->SetLookAt(pCamera->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//		m_ppObjects[j]->UpdateTransform();
-	//		m_ppObjects[j]->Render(pd3dCommandList, pCamera);
-	//	}
-	//}
+	int nStartInstance = 0;
+	for (auto& objects : m_ppObjects)
+	{
+		objects[0].RenderInstance(pd3dCommandList, pCamera, objects.size(), m_d3dInstancingBufferView, nStartInstance);
+		nStartInstance += objects.size();
+	}
 }
 
 void CBillBoardObjectsShader::ReleaseUploadBuffers()
 {
-	for (int j = 0; j < m_nObjects; j++)
+	for (auto& objects : m_ppObjects)
 	{
-		if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
-	}
+		objects[0].ReleaseUploadBuffers();
+	}	
 }

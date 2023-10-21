@@ -211,14 +211,20 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; };
+	CCamera* GetCamera()const { return m_pCamera; };
+
 private:
-	CGameObject**	m_ppObjects = nullptr;
+	CCamera* m_pCamera = nullptr;
+
+	std::vector<std::vector<CGameObject>> m_ppObjects;
 	int				m_nObjects = 0;
+	int				m_nObjectsType = 0;
 
 	CHeightMapImage* m_pHeightMapImage = nullptr;
 
-	//인스턴스 정점 버퍼와 정점 버퍼 뷰이다. 
-	ID3D12Resource* m_pd3dcbGameObjects = nullptr;
+			
+	ComPtr<ID3D12Resource> m_pd3dcbGameObjects;
 	VS_VB_INSTANCE* m_pcbMappedGameObjects = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW m_d3dInstancingBufferView;
 };
