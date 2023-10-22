@@ -194,6 +194,7 @@ public:
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 	void SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up);
+	void SetLookTo(XMFLOAT3& xmf3Look, XMFLOAT3& xmf3Up);
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -222,7 +223,11 @@ public:
 	// interface
 	virtual void SetOOBB();
 	BoundingOrientedBox GetOOBB() const { return m_OOBB; };
+
+	bool GetAlive() const { return m_bAlive; };
+	void SetAlive(bool bAlive) {  m_bAlive = bAlive; };
 public:
+	bool		 m_bAlive = true;
 	char		 m_pstrFrameName[64];
 
 	int			 m_nMeshes = 0;
@@ -266,6 +271,7 @@ public:
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
 
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
@@ -285,17 +291,6 @@ private:
 	CGameObject	*m_pTailRotorFrame = nullptr;
 };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CWhat: public CGameObject
-{
-public:
-	CWhat(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-	virtual ~CWhat();
-
-	virtual void PrepareAnimate();
-	virtual void Animate(float fTimeElapsed);
-};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

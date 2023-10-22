@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Object.h"
+#include "Missile.h"
 #include "Camera.h"
 
 using VectorComptrPSO = std::vector<ComPtr<ID3D12PipelineState>>;

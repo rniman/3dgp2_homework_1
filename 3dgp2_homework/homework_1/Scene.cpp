@@ -191,7 +191,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_pDescriptorHeap = new CDescriptorHeap();
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 8 + 1 + 1 + 4 + 1 + 6); //SuperCobra(17), Player?(8), Mi24(1), Skybox(1), Terrain(4), Water(1), billboard(6)//// Gunship(3)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 1 + 1 + 4 + 1 + 6 + 1); //SuperCobra(17), Gunship(2), Mi24(1, player), Skybox(1), Terrain(4), Water(1), billboard(6), Missile(1)//// Gunship(2)
 
 	CHelicopterPlayer* pAirplanePlayer = new CHelicopterPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -484,15 +484,6 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		//case 'W': m_ppGameObjects[0]->MoveForward(+1.0f); break;
-		//case 'S': m_ppGameObjects[0]->MoveForward(-1.0f); break;
-		//case 'A': m_ppGameObjects[0]->MoveStrafe(-1.0f); break;
-		//case 'D': m_ppGameObjects[0]->MoveStrafe(+1.0f); break;
-		//case 'Q': m_ppGameObjects[0]->MoveUp(+1.0f); break;
-		//case 'R': m_ppGameObjects[0]->MoveUp(-1.0f); break;
-		}
 		break;
 	default:
 		break;

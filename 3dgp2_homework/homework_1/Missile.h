@@ -1,13 +1,15 @@
 #pragma once
+#include "Object.h"
 
-constexpr unsigned short MAX_NUM_MISSILE = 10;
 
-class CMissile
+class CMissile : public CGameObject
 {
 public:
-
+	CMissile();;
+	CMissile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	~CMissile();
 
 private:
-	BoundingOrientedBox m_OOBB{ BoundingOrientedBox() };
+
 };
 

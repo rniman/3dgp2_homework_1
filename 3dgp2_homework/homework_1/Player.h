@@ -83,6 +83,7 @@ protected:
 	CShader*	m_pShader = nullptr;
 };
 
+constexpr unsigned short MAX_NUM_MISSILE = 10;
 
 class CHelicopterPlayer : public CPlayer
 {
@@ -90,23 +91,36 @@ public:
 	CHelicopterPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CHelicopterPlayer();
 
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+
 	void PrepareOOBB();
 
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
 
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
 
+	void Fire();
+
 	// interface
 	void SetOOBB() override;
+	
+	float GetCoolTime() const { return m_fCoolTime; };
+	void SetCoolTime(float fCoolTime) { m_fCoolTime = fCoolTime; };
 
+
+	
 private:
 	CGameObject* m_pMainBodyFrame = nullptr;
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
+	CGameObject* m_pMissileObject = nullptr;
 
 	std::array<class CMissile, MAX_NUM_MISSILE> m_arrayCMissile;
+
+	float m_fCoolTime = 0.0f;
 };
 
 

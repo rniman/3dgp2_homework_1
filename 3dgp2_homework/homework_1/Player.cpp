@@ -225,7 +225,6 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CAirplanePlayer
 
 CHelicopterPlayer::CHelicopterPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
@@ -237,6 +236,14 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 	CGameObject *pGameObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", m_pShader);
 	SetChild(pGameObject);
 
+	CGameObject* pMissile = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/hellfire.bin", m_pShader);
+	
+	m_pMissileObject = new CMissile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pMissileObject->SetChild(pMissile);
+	m_pMissileObject->SetPosition(1000.0f, 1000.0f, 2000.0f);
+	m_pMissileObject->SetScale(10.0f, 10.0f, 10.0f);
+	pMissile->AddRef();
+	
 	PrepareOOBB();
 
 	PrepareAnimate();
@@ -246,6 +253,21 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 
 CHelicopterPlayer::~CHelicopterPlayer()
 {
+}
+
+void CHelicopterPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CPlayer::UpdateShaderVariables(pd3dCommandList);
+
+	m_pMissileObject->UpdateShaderVariable(pd3dCommandList);
+
+	for (auto& missile : m_arrayCMissile)
+	{
+		if (!missile.GetAlive())
+			continue;
+
+		missile.UpdateShaderVariable(pd3dCommandList);
+	}
 }
 
 void CHelicopterPlayer::PrepareOOBB()
@@ -262,6 +284,11 @@ void CHelicopterPlayer::PrepareAnimate()
 
 void CHelicopterPlayer::Animate(float fTimeElapsed)
 {
+	if (m_fCoolTime > 0.0f)
+	{
+		m_fCoolTime -= fTimeElapsed;
+	}
+
 	m_xmf4x4Local._11 = m_xmf3Right.x; m_xmf4x4Local._12 = m_xmf3Right.y; m_xmf4x4Local._13 = m_xmf3Right.z;
 	m_xmf4x4Local._21 = m_xmf3Up.x; m_xmf4x4Local._22 = m_xmf3Up.y; m_xmf4x4Local._23 = m_xmf3Up.z;
 	m_xmf4x4Local._31 = m_xmf3Look.x; m_xmf4x4Local._32 = m_xmf3Look.y; m_xmf4x4Local._33 = m_xmf3Look.z;
@@ -277,13 +304,64 @@ void CHelicopterPlayer::Animate(float fTimeElapsed)
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
 		m_pTailRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Local);
 	}
-
+	
 	SetOOBB();
+
+	XMFLOAT3 missilePos = GetPosition();
+	missilePos.y -= 10.0f;
+	//m_pMissileObject->SetScale(10.0f, 10.0f, 10.0f);
+	m_pMissileObject->SetPosition(missilePos);
+	m_pMissileObject->SetLookTo(m_xmf3Look, m_xmf3Up);
+
+	for (auto& missile : m_arrayCMissile)
+	{
+		if (!missile.GetAlive())
+			continue;
+
+		missile.Animate(fTimeElapsed);
+	}
+}
+
+void CHelicopterPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CPlayer::Render(pd3dCommandList, pCamera);
+
+	// Missile Render
+	m_pMissileObject->UpdateTransform();
+	m_pMissileObject->Render(pd3dCommandList, pCamera);
+
+	for (auto& missile : m_arrayCMissile)
+	{
+		if (!missile.GetAlive())
+			continue;
+
+		missile.UpdateTransform();
+		missile.Render(pd3dCommandList, pCamera);
+	}
 }
 
 void CHelicopterPlayer::OnPrepareRender()
 {
 	CPlayer::OnPrepareRender();
+}
+
+void CHelicopterPlayer::Fire()
+{
+	//미사일 중 하나를 깨워서 발사시킨다.
+	for (auto& missile : m_arrayCMissile)
+	{
+		if (missile.GetAlive())
+		{
+			continue;
+		}
+
+		missile.SetAlive(true);
+
+		XMFLOAT3 missilePos = m_xmf3Position;
+		missilePos.y - 100.0f;
+		missile.SetPosition(missilePos);
+		missile.SetLookAt(m_xmf3Look, m_xmf3Up);
+	}
 }
 
 void CHelicopterPlayer::SetOOBB()

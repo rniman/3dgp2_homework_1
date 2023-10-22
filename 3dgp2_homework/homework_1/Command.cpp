@@ -66,6 +66,19 @@ void CCameraRotateYCommand::execute(CGameObject& gameObject)
 
 void CFireCommand::execute(CGameObject& gameObject)
 {
+	CHelicopterPlayer* player = dynamic_cast<CHelicopterPlayer*>(&gameObject);
+	if (player->GetCoolTime() > 0.0f)
+		return;
+
+	player->SetCoolTime(5.0f);
+	player->Fire();
+
+	char buf[256];
+	
+	char err[] = "KeyDown Fire";
+	sprintf_s(buf, sizeof(buf), "Debug: %s\n", err);
+	OutputDebugStringA(buf);
+	
 }
 
 UCHAR CBaseInputHandler::m_spKeysBuffer[] = {};

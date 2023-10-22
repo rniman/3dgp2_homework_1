@@ -574,6 +574,19 @@ void CGameObject::SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up)
 	m_xmf4x4Local._31 = mtxLookAt._13; m_xmf4x4Local._32 = mtxLookAt._23; m_xmf4x4Local._33 = mtxLookAt._33;
 }
 
+void CGameObject::SetLookTo(XMFLOAT3& xmf3Look, XMFLOAT3& xmf3Up)
+{
+	XMFLOAT3 xmf3Position(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43);
+	
+	XMMATRIX a = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
+	XMFLOAT4X4 mtxLookTo;
+	// 변환 행렬을 m_xmf4x4Local에 설정
+	XMStoreFloat4x4(&mtxLookTo, a);
+	m_xmf4x4Local._11 = mtxLookTo._11; m_xmf4x4Local._12 = mtxLookTo._21; m_xmf4x4Local._13 = mtxLookTo._31;
+	m_xmf4x4Local._21 = mtxLookTo._12; m_xmf4x4Local._22 = mtxLookTo._22; m_xmf4x4Local._23 = mtxLookTo._32;
+	m_xmf4x4Local._31 = mtxLookTo._13; m_xmf4x4Local._32 = mtxLookTo._23; m_xmf4x4Local._33 = mtxLookTo._33;
+}
+
 XMFLOAT3 CGameObject::GetPosition()
 {
 	return(XMFLOAT3(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43));
@@ -958,6 +971,53 @@ void CGunshipObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
+void CGunshipObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	// 하는거 없는 상태
+	OnPrepareRender();
+
+	UpdateShaderVariable(pd3dCommandList);
+
+	if (m_nMaterials > 1)
+	{
+		for (int i = 0; i < m_nMaterials; i++)
+		{
+			if (m_ppMaterials[i])
+			{
+				if (m_ppMaterials[i]->m_pShader)
+				{
+					m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+				}
+				m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
+			}
+
+			if (m_nMeshes == 1)
+			{
+				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i);
+			}
+		}
+	}
+	else
+	{
+		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+		{
+			if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
+			m_ppMaterials[0]->UpdateShaderVariables(pd3dCommandList);
+		}
+
+		if (m_ppMeshes)
+		{
+			for (int i = 0; i < m_nMeshes; i++)
+			{
+				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0);
+			}
+		}
+	}
+
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CMi24Object::CMi24Object(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature) : CGameObject(0, 0)
@@ -989,25 +1049,6 @@ void CMi24Object::Animate(float fTimeElapsed)
 		m_pTailRotorFrame->m_xmf4x4Local = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Local);
 	}
 
-	CGameObject::Animate(fTimeElapsed);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-CWhat::CWhat(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
-{
-}
-
-CWhat::~CWhat()
-{
-}
-
-void CWhat::PrepareAnimate()
-{
-}
-
-void CWhat::Animate(float fTimeElapsed)
-{
 	CGameObject::Animate(fTimeElapsed);
 }
 
