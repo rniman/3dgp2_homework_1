@@ -791,7 +791,7 @@ D3D12_INPUT_LAYOUT_DESC CBillBoardObjectsShader::CreateInputLayout()
 
 D3D12_SHADER_BYTECODE CBillBoardObjectsShader::CreateVertexShader()
 {
-	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSTextured.cso", &m_pd3dVertexShaderBlob);
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSBillboard.cso", &m_pd3dVertexShaderBlob);
 }
 
 D3D12_SHADER_BYTECODE CBillBoardObjectsShader::CreatePixelShader()
@@ -896,38 +896,42 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 			}
 		}
 	}
-	m_nObjectsType = 5;
+	m_nObjectsType = 6;
 
 	//std::vector<std::vector<CGameObject>> ppObjects(5);	
 	m_ppObjects.resize(m_nObjectsType);
 	for (auto& gameObject : m_ppObjects)
-		gameObject.reserve(nGrassObjects / 5);
+		gameObject.reserve(nGrassObjects / 6);
 	
 	CTexturedRectMesh* grassMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 0.0f);
 	CTexturedRectMesh* treeMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 120.0f, 120.0f, 0.0f);
 
-	CTexture* pTestTexture[5];
+	CTexture* pTestTexture[6];
 	pTestTexture[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTestTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Grass01.dds", RESOURCE_TEXTURE2D, 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[0], 0, 3);
 
 	pTestTexture[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/pngegg.dds", RESOURCE_TEXTURE2D, 0);
+	pTestTexture[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Grass02.dds", RESOURCE_TEXTURE2D, 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[1], 0, 3);
 
 	pTestTexture[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryGrass.dds", RESOURCE_TEXTURE2D, 0);
+	pTestTexture[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/pngegg.dds", RESOURCE_TEXTURE2D, 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[2], 0, 3);
 
 	pTestTexture[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[3]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryTree.dds", RESOURCE_TEXTURE2D, 0);
+	pTestTexture[3]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryGrass.dds", RESOURCE_TEXTURE2D, 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[3], 0, 3);
 
 	pTestTexture[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[4]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryTree2.dds", RESOURCE_TEXTURE2D, 0);
+	pTestTexture[4]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryTree.dds", RESOURCE_TEXTURE2D, 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[4], 0, 3);
 
-	CMaterial* pTestMaterial[5];
+	pTestTexture[5] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTestTexture[5]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryTree2.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[5], 0, 3);
+
+	CMaterial* pTestMaterial[6];
 	pTestMaterial[0] = new CMaterial();
 	pTestMaterial[0]->SetTexture(pTestTexture[0]);
 	pTestMaterial[1] = new CMaterial();
@@ -938,6 +942,9 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	pTestMaterial[3]->SetTexture(pTestTexture[3]);
 	pTestMaterial[4] = new CMaterial();
 	pTestMaterial[4]->SetTexture(pTestTexture[4]);
+	pTestMaterial[5] = new CMaterial();
+	pTestMaterial[5]->SetTexture(pTestTexture[5]);
+
 
 	int i = 0;
 	int nTypeDryTexture;
@@ -958,34 +965,40 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				if (nTypeDryTexture < 5)
 				{
 					pMesh = treeMesh;
-					nMaterialType = 3;
+					nMaterialType = 4;
 					fyOffset = 120.0f * 0.15f;
 				}
 				else if (nTypeDryTexture < 10)
 				{
 					pMesh = grassMesh;
-					nMaterialType = 4;
+					nMaterialType = 5;
 					fyOffset = 120.0f * 0.25f;
 				}
 				else if (nTypeDryTexture < 50)
 				{
 					pMesh = grassMesh;
-					nMaterialType = 1;
+					nMaterialType = 2;
 					fyOffset = -10.0f * 0.01f;
 				}
 				else
 				{
 					pMesh = grassMesh;
-					nMaterialType = 2;
+					nMaterialType = 3;
 					fyOffset = 10.0f * 0.3f;
 				}
 				break;
 			case 200:
-				if (random_int(dre) < 30)
-					continue;
 				pMesh = grassMesh;
-				nMaterialType = 0;
-				fyOffset = 10.0f * 0.3f;
+				if(random_int(dre) < 30)
+				{
+					nMaterialType = 0;
+					fyOffset = 10.0f * 0.3f;
+				}
+				else
+				{
+					nMaterialType = 1;
+					fyOffset = 10.0f * 0.4f;
+				}				
 				break;
 			case 131:
 				if (random_int(dre) < 95)
@@ -995,28 +1008,34 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				if (nTypeDryTexture < 10)
 				{
 					pMesh = treeMesh;
-					nMaterialType = 3;
+					nMaterialType = 4;
 					fyOffset = 120.0f * 0.15f;
 				}
 				else if (nTypeDryTexture < 20)
 				{
 					pMesh = treeMesh;
-					nMaterialType = 4;
+					nMaterialType = 5;
 					fyOffset = 120.0f * 0.25f;
 				}
 				else
 				{
 					pMesh = grassMesh;
-					nMaterialType = 2;
+					nMaterialType = 3;
 					fyOffset = 10.0f * 0.3f;
 				}
 				break;
 			case 23:
-				if (random_int(dre) < 15)
-					continue;
 				pMesh = grassMesh;
-				nMaterialType = 0;
-				fyOffset = 10.0f * 0.4f;
+				if (random_int(dre) < 70)
+				{
+					nMaterialType = 0;
+					fyOffset = 10.0f * 0.3f;
+				}
+				else
+				{
+					nMaterialType = 1;
+					fyOffset = 10.0f * 0.4f;
+				}
 				break;
 			default:
 				break;
@@ -1027,7 +1046,9 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				float xPosition = x * scale.x;
 				float zPosition = z * scale.z;
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-				
+				if (fHeight < 80.0f)
+					continue;
+
 				m_ppObjects[nMaterialType].emplace_back(1,1);
 				m_ppObjects[nMaterialType].rbegin()->SetMesh(0, pMesh);
 				m_ppObjects[nMaterialType].rbegin()->SetMaterial(0, pTestMaterial[nMaterialType]);

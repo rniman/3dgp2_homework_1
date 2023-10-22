@@ -204,14 +204,14 @@ void CTexturedRectMesh::ReleaseUploadBuffers()
 	if (m_pd3dTextureCoord0UploadBuffer.Get()) m_pd3dTextureCoord0UploadBuffer.ReleaseAndGetAddressOf();
 }
 
-void CTexturedRectMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubset)
+void CTexturedRectMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dVertexBufferView, m_d3dTextureCoord0BufferView };
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
 
-	pd3dCommandList->DrawInstanced(m_nVertices, nSubset, m_nOffset, 0);
+	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 }
 
 void CTexturedRectMesh::RenderInstance(ID3D12GraphicsCommandList* pd3dCommandList, int nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView, int nStartInstance)
