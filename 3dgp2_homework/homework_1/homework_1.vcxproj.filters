@@ -164,5 +164,14 @@
     <FxCompile Include="PSTextured.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="GSBillboard.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="VSBillboard.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="PSBillboard.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

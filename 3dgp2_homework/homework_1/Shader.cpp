@@ -616,12 +616,12 @@ D3D12_INPUT_LAYOUT_DESC CTransparentOjectsShader::CreateInputLayout()
 
 D3D12_SHADER_BYTECODE CTransparentOjectsShader::CreateVertexShader()
 {
-	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSFloor.cso", &m_pd3dVertexShaderBlob);
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSOcean.cso", &m_pd3dVertexShaderBlob);
 }
 
 D3D12_SHADER_BYTECODE CTransparentOjectsShader::CreatePixelShader()
 {
-	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSFloor.cso", &m_pd3dVertexShaderBlob);
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSOcean.cso", &m_pd3dPixelShaderBlob);
 }
 
 D3D12_RASTERIZER_DESC CTransparentOjectsShader::CreateRasterizerState()
@@ -799,6 +799,7 @@ D3D12_SHADER_BYTECODE CBillBoardObjectsShader::CreatePixelShader()
 	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSTextured.cso", &m_pd3dPixelShaderBlob);
 }
 
+
 D3D12_BLEND_DESC CBillBoardObjectsShader::CreateBlendState()
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
@@ -854,14 +855,12 @@ void CBillBoardObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* p
 	{
 		for (auto& gameObject : m_ppObjects[j])
 		{
-			gameObject.SetLookAt(m_pCamera->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+			//gameObject.SetLookAt(m_pCamera->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 			gameObject.UpdateTransform();
 			XMStoreFloat4x4(&m_pcbMappedGameObjects[i++].m_xmf4x4Transform, XMMatrixTranspose(XMLoadFloat4x4(&gameObject.GetWorldTransform())));
 		}
-		//XMStoreFloat4x4(&m_pcbMappedGameObjects[j].m_xmf4x4Transform, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->GetWorldTransform())));
 	}
 }
-
 
 void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
@@ -952,7 +951,7 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 			switch (m_pHeightMapImage->GetRawImagePixel(x,z))
 			{
 			case 255:
-				if (random_int(dre) < 80)
+				if (random_int(dre) < 95)
 					continue;
 				
 				nTypeDryTexture = random_int(dre);
@@ -982,24 +981,24 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				}
 				break;
 			case 200:
-				if (random_int(dre) < 80)
+				if (random_int(dre) < 30)
 					continue;
 				pMesh = grassMesh;
 				nMaterialType = 0;
 				fyOffset = 10.0f * 0.3f;
 				break;
 			case 131:
-				if (random_int(dre) < 99)
+				if (random_int(dre) < 95)
 					continue;
 
 				nTypeDryTexture = random_int(dre);
-				if (nTypeDryTexture < 20)
+				if (nTypeDryTexture < 10)
 				{
 					pMesh = treeMesh;
 					nMaterialType = 3;
 					fyOffset = 120.0f * 0.15f;
 				}
-				else if (nTypeDryTexture < 40)
+				else if (nTypeDryTexture < 20)
 				{
 					pMesh = treeMesh;
 					nMaterialType = 4;
@@ -1013,7 +1012,7 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				}
 				break;
 			case 23:
-				if (random_int(dre) < 75)
+				if (random_int(dre) < 15)
 					continue;
 				pMesh = grassMesh;
 				nMaterialType = 0;
