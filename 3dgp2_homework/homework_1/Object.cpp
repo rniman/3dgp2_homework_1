@@ -587,6 +587,12 @@ void CGameObject::SetLookTo(XMFLOAT3& xmf3Look, XMFLOAT3& xmf3Up)
 	m_xmf4x4Local._31 = mtxLookTo._13; m_xmf4x4Local._32 = mtxLookTo._23; m_xmf4x4Local._33 = mtxLookTo._33;
 }
 
+void CGameObject::SetLocalTransform(XMFLOAT4X4& xmf4x4World)
+{
+	m_xmf4x4Local = xmf4x4World;
+}
+
+
 XMFLOAT3 CGameObject::GetPosition()
 {
 	return(XMFLOAT3(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43));
@@ -917,6 +923,12 @@ CSuperCobraObject::~CSuperCobraObject()
 {
 }
 
+void CSuperCobraObject::PrepareOOBB()
+{
+	m_pMainBodyFrame = FindFrame("Fuselage");
+	SetOOBB();
+}
+
 void CSuperCobraObject::PrepareAnimate()
 {
 	m_pMainRotorFrame = FindFrame("MainRotor");
@@ -937,6 +949,14 @@ void CSuperCobraObject::Animate(float fTimeElapsed)
 	}
 
 	CGameObject::Animate(fTimeElapsed);
+
+	SetOOBB();
+}
+
+void CSuperCobraObject::SetOOBB()
+{
+	m_pMainBodyFrame->GetMesh(0)->GetOOBB().Transform(m_OOBB, XMLoadFloat4x4(&m_xmf4x4Local));
+	XMStoreFloat4(&m_OOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_OOBB.Orientation)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -947,6 +967,12 @@ CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 CGunshipObject::~CGunshipObject()
 {
+}
+
+void CGunshipObject::PrepareOOBB()
+{
+	m_pMainBodyFrame = FindFrame("Gunship")->GetChild();
+	SetOOBB();
 }
 
 void CGunshipObject::PrepareAnimate()
@@ -971,52 +997,58 @@ void CGunshipObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
-void CGunshipObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CGunshipObject::SetOOBB()
 {
-	// 하는거 없는 상태
-	OnPrepareRender();
-
-	UpdateShaderVariable(pd3dCommandList);
-
-	if (m_nMaterials > 1)
-	{
-		for (int i = 0; i < m_nMaterials; i++)
-		{
-			if (m_ppMaterials[i])
-			{
-				if (m_ppMaterials[i]->m_pShader)
-				{
-					m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
-				}
-				m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
-			}
-
-			if (m_nMeshes == 1)
-			{
-				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i);
-			}
-		}
-	}
-	else
-	{
-		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
-		{
-			if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
-			m_ppMaterials[0]->UpdateShaderVariables(pd3dCommandList);
-		}
-
-		if (m_ppMeshes)
-		{
-			for (int i = 0; i < m_nMeshes; i++)
-			{
-				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0);
-			}
-		}
-	}
-
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	m_pMainBodyFrame->GetMesh(0)->GetOOBB().Transform(m_OOBB, XMLoadFloat4x4(&m_xmf4x4Local));
+	XMStoreFloat4(&m_OOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_OOBB.Orientation)));
 }
+
+//void CGunshipObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+//{
+//	// 하는거 없는 상태
+//	OnPrepareRender();
+//
+//	UpdateShaderVariable(pd3dCommandList);
+//
+//	if (m_nMaterials > 1)
+//	{
+//		for (int i = 0; i < m_nMaterials; i++)
+//		{
+//			if (m_ppMaterials[i])
+//			{
+//				if (m_ppMaterials[i]->m_pShader)
+//				{
+//					m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+//				}
+//				m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
+//			}
+//
+//			if (m_nMeshes == 1)
+//			{
+//				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i);
+//			}
+//		}
+//	}
+//	else
+//	{
+//		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+//		{
+//			if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
+//			m_ppMaterials[0]->UpdateShaderVariables(pd3dCommandList);
+//		}
+//
+//		if (m_ppMeshes)
+//		{
+//			for (int i = 0; i < m_nMeshes; i++)
+//			{
+//				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0);
+//			}
+//		}
+//	}
+//
+//	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+//	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //

@@ -393,12 +393,15 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 			{
 				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 				m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
+				m_ppObjects[nObjects]->PrepareOOBB();
 				pSuperCobraModel->AddRef();
 			}
 			else
 			{
 				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 				m_ppObjects[nObjects]->SetChild(pGunshipModel);
+				m_ppObjects[nObjects]->SetChild(pGunshipModel);
+				m_ppObjects[nObjects]->PrepareOOBB();
 				pGunshipModel->AddRef();
 			}
 			XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace);
@@ -416,12 +419,14 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 			{
 				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 				m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
+				m_ppObjects[nObjects]->PrepareOOBB();
 				pSuperCobraModel->AddRef();
 			}
 			else
 			{
 				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 				m_ppObjects[nObjects]->SetChild(pGunshipModel);
+				m_ppObjects[nObjects]->PrepareOOBB();
 				pGunshipModel->AddRef();
 			}
 			XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace);

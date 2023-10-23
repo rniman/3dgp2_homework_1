@@ -165,10 +165,9 @@ public:
 	void SetShader(int nMaterial, CShader* pShader);
 	void SetMaterial(int nMaterial, CMaterial* pMaterial);
 
-	void SetChild(CGameObject* pChild);
-
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 
+	virtual void PrepareOOBB(){ };
 	virtual void PrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed);
 
@@ -195,6 +194,7 @@ public:
 	void SetScale(float x, float y, float z);
 	void SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up);
 	void SetLookTo(XMFLOAT3& xmf3Look, XMFLOAT3& xmf3Up);
+	void SetLocalTransform(XMFLOAT4X4& xmf4x4World);
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -226,6 +226,12 @@ public:
 
 	bool GetAlive() const { return m_bAlive; };
 	void SetAlive(bool bAlive) {  m_bAlive = bAlive; };
+
+	void SetChild(CGameObject* pChild);
+
+	CGameObject* GetChild() const { return m_pChild; };
+	CGameObject* GetSibling() const { return m_pSibling; };
+	CGameObject* GetParent() const { return m_pParent; };
 public:
 	bool		 m_bAlive = true;
 	char		 m_pstrFrameName[64];
@@ -254,12 +260,15 @@ public:
 	CSuperCobraObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CSuperCobraObject();
 
-	virtual void PrepareAnimate();
-	virtual void Animate(float fTimeElapsed);
+	virtual void PrepareOOBB() override;
+	virtual void PrepareAnimate() override;
+	virtual void Animate(float fTimeElapsed) override;
 
+	virtual void SetOOBB() override;
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
+	CGameObject* m_pMainBodyFrame = nullptr;
 };
 
 class CGunshipObject : public CGameObject
@@ -268,13 +277,18 @@ public:
 	CGunshipObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CGunshipObject();
 
+	virtual void PrepareOOBB() override;
+
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override;
 
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
+	virtual void SetOOBB() override;
+
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
+	CGameObject* m_pMainBodyFrame = nullptr;
 };
 
 class CMi24Object : public CGameObject

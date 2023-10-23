@@ -93,11 +93,11 @@ public:
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	void PrepareOOBB();
+	void PrepareOOBB() override;
 
-	virtual void PrepareAnimate();
-	virtual void Animate(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
+	virtual void PrepareAnimate() override;
+	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override;
 
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
@@ -105,20 +105,18 @@ public:
 	void Fire();
 
 	// interface
-	void SetOOBB() override;
+	virtual void SetOOBB() override;
 	
 	float GetCoolTime() const { return m_fCoolTime; };
 	void SetCoolTime(float fCoolTime) { m_fCoolTime = fCoolTime; };
-
-
-	
+		
 private:
 	CGameObject* m_pMainBodyFrame = nullptr;
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
 	CGameObject* m_pMissileObject = nullptr;
 
-	std::array<class CMissile, MAX_NUM_MISSILE> m_arrayCMissile;
+	std::array<class CMissile*, MAX_NUM_MISSILE> m_arrayCMissile;
 
 	float m_fCoolTime = 0.0f;
 };

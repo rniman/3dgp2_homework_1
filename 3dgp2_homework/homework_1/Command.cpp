@@ -70,7 +70,7 @@ void CFireCommand::execute(CGameObject& gameObject)
 	if (player->GetCoolTime() > 0.0f)
 		return;
 
-	player->SetCoolTime(5.0f);
+	player->SetCoolTime(2.0f);
 	player->Fire();
 
 	char buf[256];
@@ -78,7 +78,6 @@ void CFireCommand::execute(CGameObject& gameObject)
 	char err[] = "KeyDown Fire";
 	sprintf_s(buf, sizeof(buf), "Debug: %s\n", err);
 	OutputDebugStringA(buf);
-	
 }
 
 UCHAR CBaseInputHandler::m_spKeysBuffer[] = {};
