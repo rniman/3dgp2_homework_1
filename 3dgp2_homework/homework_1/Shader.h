@@ -109,7 +109,8 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState=0);
 
-	int GetNumberOfObjects() { return(m_nObjects); }
+	CGameObject** GetObjects() const { return m_ppObjects; };
+	int GetNumberOfObjects() const { return(m_nObjects); }
 
 protected:
 	CGameObject**	m_ppObjects = 0;

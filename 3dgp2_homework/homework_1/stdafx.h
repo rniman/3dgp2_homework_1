@@ -59,8 +59,16 @@ using Microsoft::WRL::ComPtr;
 
 #pragma comment(lib, "dxguid.lib")
 
-// 편하게 쓰기 위해
+// 출력 창으로 디버깅
+inline void OutputDebugMessage(const char* pDebugMessage)
+{
+	char buf[256];
+	const char* err = { pDebugMessage };
+	sprintf_s(buf, sizeof(buf), "Debug: %s\n", err);
+	OutputDebugStringA(buf);
+}
 
+// 편하게 쓰기 위해
 using VectorComptrResource = std::vector<ComPtr<ID3D12Resource>>;
 
 

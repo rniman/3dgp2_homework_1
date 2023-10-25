@@ -128,6 +128,15 @@ void CPlayer::Rotate(float x, float y, float z)
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
 }
 
+void CPlayer::Decelerate(float fTimeElapsed)
+{
+	float fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = (m_fFriction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+}
+
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
@@ -153,10 +162,7 @@ void CPlayer::Update(float fTimeElapsed)
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
 
-	fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (m_fFriction * fTimeElapsed);
-	if (fDeceleration > fLength) fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	//Decelerate(fTimeElapsed);
 }
 
 CCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
@@ -205,6 +211,11 @@ CCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 
 void CPlayer::Animate(float fTimeElapsed)
 {
+	if (!m_bAlive)
+	{
+		return;
+	}
+
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -240,11 +251,9 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 	
 	m_pMissileObject = new CMissile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pMissileObject->SetChild(pMissileModel);
-	//m_pMissileObject->SetPosition(1000.0f, 1000.0f, 2000.0f);
 	pMissileModel->AddRef();
 	
-
-	for (auto& missile : m_arrayCMissile)
+	for (auto& missile : m_arraypMissile)
 	{
 		missile = new CMissile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		missile->SetChild(pMissileModel);
@@ -270,7 +279,7 @@ void CHelicopterPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCom
 
 	m_pMissileObject->UpdateShaderVariable(pd3dCommandList);
 
-	for (auto& missile : m_arrayCMissile)
+	for (auto& missile : m_arraypMissile)
 	{
 		if (!missile->GetAlive())
 			continue;
@@ -293,6 +302,11 @@ void CHelicopterPlayer::PrepareAnimate()
 
 void CHelicopterPlayer::Animate(float fTimeElapsed)
 {
+	if (!m_bAlive)
+	{
+		return;
+	}
+
 	if (m_fCoolTime > 0.0f)
 	{
 		m_fCoolTime -= fTimeElapsed;
@@ -326,24 +340,98 @@ void CHelicopterPlayer::Animate(float fTimeElapsed)
 
 	m_pMissileObject->SetLocalTransform(matrix);
 
-	for (auto& missile : m_arrayCMissile)
+	for (auto& missile : m_arraypMissile)
 	{
 		if (!missile->GetAlive())
 			continue;
 
 		missile->Animate(fTimeElapsed);
 	}
+
+}
+
+void CHelicopterPlayer::Collide(CGameObject* pCollidedObject, float fTimeElapsed)
+{
+	if (!m_bAlive)
+	{
+		return;
+	}
+
+	if (pCollidedObject == nullptr)	// 맵 밖으로 나간 것
+	{
+		if((m_xmf3Position.x > 5120.0f && m_xmf3Look.z < 0.0f) || (m_xmf3Position.x < 0.0f && m_xmf3Look.z >= 0.0f))
+		{
+			// 시계 회전
+			XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(45.0f));
+			XMFLOAT4X4 xmf4x4Rotate;
+			XMStoreFloat4x4(&xmf4x4Rotate, rotate);
+			Rotate(0.0f, 45.0f, 0.0f);
+			m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmf4x4Rotate);
+			Update(fTimeElapsed);
+		}
+		else if ((m_xmf3Position.x > 5120.0f && m_xmf3Look.z >= 0.0f) || (m_xmf3Position.x < 0.0f && m_xmf3Look.z < 0.0f))
+		{
+			// 반 시계 회전
+			XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(-45.0f));
+			XMFLOAT4X4 xmf4x4Rotate;
+			XMStoreFloat4x4(&xmf4x4Rotate, rotate);
+			Rotate(0.0f, -45.0f, 0.0f);
+			m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmf4x4Rotate);
+			Update(fTimeElapsed);
+		}
+		else if ((m_xmf3Position.z > 5120.0f && m_xmf3Look.x >= 0.0f) || (m_xmf3Position.z < 0.0f && m_xmf3Look.x < 0.0f))
+		{
+			// 시계 회전
+			XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(45.0f));
+			XMFLOAT4X4 xmf4x4Rotate;
+			XMStoreFloat4x4(&xmf4x4Rotate, rotate);
+			Rotate(0.0f, 45.0f, 0.0f);
+			m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmf4x4Rotate);
+			Update(fTimeElapsed);
+		}
+		else if ((m_xmf3Position.z > 5120.0f && m_xmf3Look.x < 0.0f) || (m_xmf3Position.z < 0.0f && m_xmf3Look.x >= 0.0f))
+		{
+			// 반 시계 회전
+			XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(-45.0f));
+			XMFLOAT4X4 xmf4x4Rotate;
+			XMStoreFloat4x4(&xmf4x4Rotate, rotate);
+			Rotate(0.0f, -45.0f, 0.0f);
+			m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmf4x4Rotate);
+			Update(fTimeElapsed);
+		}
+	}
+
+	if (dynamic_cast<CHeightMapTerrain*>(pCollidedObject))
+	{
+		OutputDebugMessage("Collide!");
+		m_bAlive = false;
+	}
+
+	if (dynamic_cast<CMissile*>(pCollidedObject))
+	{
+		//hp-- 
+	}
+
+	if (dynamic_cast<CGunshipObject*>(pCollidedObject) || dynamic_cast<CSuperCobraObject*>(pCollidedObject))
+	{
+		//hp-- 
+	}
 }
 
 void CHelicopterPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	if (!m_bAlive)
+	{
+		return;
+	}
+
 	CPlayer::Render(pd3dCommandList, pCamera);
 
 	// Missile Render
 	m_pMissileObject->UpdateTransform(&this->GetWorldTransform());
 	m_pMissileObject->Render(pd3dCommandList, pCamera);
 
-	for (auto& missile : m_arrayCMissile)
+	for (auto& missile : m_arraypMissile)
 	{
 		if (!missile->GetAlive())
 			continue;
@@ -361,7 +449,7 @@ void CHelicopterPlayer::OnPrepareRender()
 void CHelicopterPlayer::Fire()
 {
 	//미사일 중 하나를 깨워서 발사시킨다.
-	for (auto& missile : m_arrayCMissile)
+	for (auto& missile : m_arraypMissile)
 	{
 		if (missile->GetAlive())
 		{
@@ -421,13 +509,14 @@ CCamera *CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 			break;
 		case THIRD_PERSON_CAMERA:
-			SetFriction(20.5f);
+			SetFriction(150.0f);
 			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			SetMaxVelocityXZ(1000.0f);
-			SetMaxVelocityY(1000.0f);
+			//SetGravity(XMFLOAT3(0.0f, -5.0f, 0.0f));
+			SetMaxVelocityXZ(200.0f);
+			SetMaxVelocityY(200.0f);
 			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.25f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -30.0f));
+			m_pCamera->SetOffset(XMFLOAT3(0.0f, 10.0f, -30.0f));
 			m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);

@@ -953,6 +953,10 @@ void CSuperCobraObject::Animate(float fTimeElapsed)
 	SetOOBB();
 }
 
+void CSuperCobraObject::Collide(CGameObject* pCollidedObject, float fTimeElapsed)
+{
+}
+
 void CSuperCobraObject::SetOOBB()
 {
 	m_pMainBodyFrame->GetMesh(0)->GetOOBB().Transform(m_OOBB, XMLoadFloat4x4(&m_xmf4x4Local));
@@ -995,6 +999,12 @@ void CGunshipObject::Animate(float fTimeElapsed)
 	}
 
 	CGameObject::Animate(fTimeElapsed);
+
+	SetOOBB();
+}
+
+void CGunshipObject::Collide(CGameObject* pCollidedObject, float fTimeElapsed)
+{
 }
 
 void CGunshipObject::SetOOBB()

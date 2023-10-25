@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Scene.h"
+#include "Collision.h"
 
 CDescriptorHeap* CScene::m_pDescriptorHeap = nullptr;
 
@@ -194,7 +195,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 1 + 1 + 4 + 1 + 6 + 1); //SuperCobra(17), Gunship(2), Mi24(1, player), Skybox(1), Terrain(4), Water(1), billboard(6), Missile(1)//// Gunship(2)
 
 	CHelicopterPlayer* pAirplanePlayer = new CHelicopterPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
-	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	pAirplanePlayer->SetPosition(XMFLOAT3(5100.0f, 1000.0f, 2560.0f ));
+	//pAirplanePlayer->Rotate(0.0f, 165.0f, 0.0f);
 	m_pPlayer = pAirplanePlayer;
 
 	BuildDefaultLightsAndMaterials();
@@ -228,6 +230,12 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppShaders[1] = pBillboardObjectsShader;
 	m_ppShaders[2] = pTransparentObjectsShader;
 
+	m_pCollision = new CCollision;
+	m_pCollision->SetPlayer(m_pPlayer);
+	m_pCollision->SetTerrain(m_pTerrain);
+	m_pCollision->SetReserveObjects(pObjectsShader->GetNumberOfObjects());
+	m_pCollision->SetEnemyObjects(pObjectsShader->GetObjects(), pObjectsShader->GetNumberOfObjects());
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -236,6 +244,8 @@ void CScene::ReleaseObjects()
 	if (m_pDescriptorHeap) delete m_pDescriptorHeap;
 
 	ReleaseShaderVariables();
+
+	if (m_pCollision) delete m_pCollision;
 
 	if (m_ppShaders)
 	{
@@ -511,6 +521,12 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
+}
+
+void CScene::ProcessCollide(float fTimeElapsed)
+{
+	// 각 오브젝트 간의 충돌 처리
+	m_pCollision->Collide(fTimeElapsed);
 }
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)

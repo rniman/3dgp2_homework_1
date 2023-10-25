@@ -5,44 +5,46 @@
 
 void CForwardCommand::execute(CGameObject& gameObject)
 {
-	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), 10.25f);
-	player->Move(shift, false);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), gameObject.GetLook(), 10.0f);
+	gameObject.Move(shift, true);
+
+	//CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
+	//player->Move(shift, true);
 }
 
 void CBackwardCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), -10.25f);
-	player->Move(shift, false);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), -10.0f);
+	player->Move(shift, true);
 }
 
 void CRightCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), 10.25f);
-	player->Move(shift, false);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), 10.0f);
+	player->Move(shift, true);
 }
 
 void CLeftCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), -10.25f);
-	player->Move(shift, false);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), -10.0f);
+	player->Move(shift, true);
 }
 
 void CUpCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetUp(), 10.25f);
-	player->Move(shift, false);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetUp(), 10.0f);
+	player->Move(shift, true);
 }
 
 void CDownCommand::execute(CGameObject& gameObject)
 {
 	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetUp(), -10.25f);
-	player->Move(shift, false);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetUp(), -10.0f);
+	player->Move(shift, true);
 }
 
 void CCameraRotateYCommand::execute(CGameObject& gameObject)

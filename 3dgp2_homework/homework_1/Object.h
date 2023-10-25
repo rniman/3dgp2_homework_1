@@ -170,6 +170,8 @@ public:
 	virtual void PrepareOOBB(){ };
 	virtual void PrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed);
+	virtual void Collide(CGameObject* pCollidedObject = nullptr, float fTimeElapsed = 0.0f) {};
+	virtual void Update(float fTimeElapsed) {};
 
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
@@ -196,11 +198,12 @@ public:
 	void SetLookTo(XMFLOAT3& xmf3Look, XMFLOAT3& xmf3Up);
 	void SetLocalTransform(XMFLOAT4X4& xmf4x4World);
 
+	virtual void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false) {};
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
 	void MoveForward(float fDistance = 1.0f);
 
-	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT4* pxmf4Quaternion);
 
@@ -232,6 +235,8 @@ public:
 	CGameObject* GetChild() const { return m_pChild; };
 	CGameObject* GetSibling() const { return m_pSibling; };
 	CGameObject* GetParent() const { return m_pParent; };
+	
+	virtual class CMissile* GetMissile(int nIndex) { return nullptr; };
 public:
 	bool		 m_bAlive = true;
 	char		 m_pstrFrameName[64];
@@ -263,8 +268,11 @@ public:
 	virtual void PrepareOOBB() override;
 	virtual void PrepareAnimate() override;
 	virtual void Animate(float fTimeElapsed) override;
+	virtual void Collide(CGameObject* pCollidedObject = nullptr, float fTimeElapsed = 0.0f) override;
 
 	virtual void SetOOBB() override;
+
+	virtual class CMissile* GetMissile(int nIndex) { return nullptr; };
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
@@ -281,10 +289,12 @@ public:
 
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
+	virtual void Collide(CGameObject* pCollidedObject = nullptr, float fTimeElapsed = 0.0f) override;
 	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override;
 
 	virtual void SetOOBB() override;
 
+	virtual class CMissile* GetMissile(int nIndex) { return nullptr; };
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;

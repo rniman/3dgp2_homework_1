@@ -51,3 +51,9 @@ void CMissile::SetOOBB()
 	XMStoreFloat4(&m_OOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_OOBB.Orientation)));
 }
 
+void CMissile::Collide(CGameObject* pCollidedObject, float fTimeElapsed)
+{
+	m_fLifeTime = 0.0f;
+	m_bAlive = false;
+}
+

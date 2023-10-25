@@ -972,13 +972,13 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				{
 					pMesh = treeMesh;
 					nMaterialType = 4;
-					fyOffset = 120.0f * 0.15f;
+					fyOffset = 120.0f * 0.30f;
 				}
 				else if (nTypeDryTexture < 10)
 				{
 					pMesh = grassMesh;
 					nMaterialType = 5;
-					fyOffset = 120.0f * 0.25f;
+					fyOffset = 120.0f * 0.40f;
 				}
 				else if (nTypeDryTexture < 50)
 				{
@@ -1015,13 +1015,13 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				{
 					pMesh = treeMesh;
 					nMaterialType = 4;
-					fyOffset = 120.0f * 0.15f;
+					fyOffset = 120.0f * 0.30f;
 				}
 				else if (nTypeDryTexture < 20)
 				{
 					pMesh = treeMesh;
 					nMaterialType = 5;
-					fyOffset = 120.0f * 0.25f;
+					fyOffset = 120.0f * 0.40f;
 				}
 				else
 				{

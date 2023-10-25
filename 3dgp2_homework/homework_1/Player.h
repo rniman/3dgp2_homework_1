@@ -17,15 +17,15 @@ public:
 	virtual ~CPlayer();
 
 	virtual void Animate(float fTimeElapsed);
+	virtual void Update(float fTimeElapsed) override;
 
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(nullptr); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr);
 
-	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
-	void Rotate(float x, float y, float z);
-
-	void Update(float fTimeElapsed);
+	virtual void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false) override;
+	virtual void Rotate(float x, float y, float z) override;
+	void Decelerate(float fTimeElapsed);
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void ReleaseShaderVariables();
@@ -38,7 +38,6 @@ public:
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
 
 	CCamera *OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
-
 
 	// interface
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
@@ -97,6 +96,7 @@ public:
 
 	virtual void PrepareAnimate() override;
 	virtual void Animate(float fTimeElapsed) override;
+	virtual void Collide(CGameObject* pCollidedObject = nullptr, float fTimeElapsed = 0.0f) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override;
 
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
@@ -109,14 +109,19 @@ public:
 	
 	float GetCoolTime() const { return m_fCoolTime; };
 	void SetCoolTime(float fCoolTime) { m_fCoolTime = fCoolTime; };
-		
+	
+	virtual class CMissile* GetMissile(int nIndex) {
+		if (nIndex > MAX_NUM_MISSILE || nIndex < 0)
+			return nullptr;
+		return m_arraypMissile[nIndex]; 
+	};
 private:
 	CGameObject* m_pMainBodyFrame = nullptr;
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
 	CGameObject* m_pMissileObject = nullptr;
 
-	std::array<class CMissile*, MAX_NUM_MISSILE> m_arrayCMissile;
+	std::array<CMissile*, MAX_NUM_MISSILE> m_arraypMissile;
 
 	float m_fCoolTime = 0.0f;
 };

@@ -437,6 +437,11 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(fTimeElapsed);
 }
 
+void CGameFramework::ProcessCollide()
+{
+	if (m_pScene) m_pScene->ProcessCollide(m_GameTimer.GetTimeElapsed());
+}
+
 void CGameFramework::WaitForGpuComplete()
 {
 	const UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
@@ -473,6 +478,8 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 
     AnimateObjects();
+
+	ProcessCollide();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), nullptr);
