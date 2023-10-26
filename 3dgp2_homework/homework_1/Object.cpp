@@ -10,7 +10,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters)
+CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters, int nRows, int nCols)
 {
 	m_nTextureType = nTextureType;
 
@@ -45,6 +45,9 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 
 	m_nSamplers = nSamplers;
 	if (m_nSamplers > 0) m_pd3dSamplerGpuDescriptorHandles = new D3D12_GPU_DESCRIPTOR_HANDLE[m_nSamplers];
+
+	m_nRows = nRows;
+	m_nColumns = nCols;
 }
 
 CTexture::~CTexture()
@@ -78,6 +81,11 @@ void CTexture::SetSampler(int nIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dSamplerGpuD
 
 void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_nColumns, 33);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_nRows, 34);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_nColumn, 35);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_nRow, 36);
+
 	if (m_nRootParameters == m_nTextures)
 	{
 		for (int i = 0; i < m_nRootParameters; i++)
@@ -253,6 +261,23 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 	return(d3dShaderResourceViewDesc);
 }
 
+void CTexture::AnimateRowColumn(float fTime)
+{
+	if (fTime == 0.0f)
+	{
+		if (++m_nColumn == m_nColumns)
+		{
+			m_nRow++;
+			m_nColumn = 0;
+		}
+
+		if (m_nRow == m_nRows)
+		{
+			m_nRow = 0;
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CMaterial::CMaterial()
@@ -312,7 +337,8 @@ CGameObject::CGameObject()
 	m_xmf4x4World = Matrix4x4::Identity();
 }
 
-CGameObject::CGameObject(int nMeshes, int nMaterials) : CGameObject()
+CGameObject::CGameObject(int nMeshes, int nMaterials) 
+	: CGameObject()
 {
 	m_nMeshes = nMeshes;
 	m_ppMeshes = nullptr;
@@ -1222,14 +1248,35 @@ COceanObjcet::~COceanObjcet()
 
 void COceanObjcet::Animate(float fTimeElapsed)
 {
-	//if(m_pPlayer)
-	//{
-	//	m_xmf4x4Local._41 = m_pPlayer->GetPosition().x;
-	//	m_xmf4x4Local._43 = m_pPlayer->GetPosition().z;
-	//}
+
 }
 
 void COceanObjcet::SetPlayer(CPlayer* pPlayer)
 {
 	m_pPlayer = pPlayer;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CSpriteObject::CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+	: CGameObject(1, 1)
+{
+}
+
+CSpriteObject::~CSpriteObject()
+{
+}
+
+void CSpriteObject::Animate(float fTimeElapsed)
+{
+	if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+	{
+		m_fTime += fTimeElapsed * 0.5f;
+		if (m_fTime >= m_fSpeed) 
+		{
+			m_fTime = 0.0f;
+		}
+		m_ppMaterials[0]->m_pTexture->AnimateRowColumn(m_fTime);
+	}
+}
+

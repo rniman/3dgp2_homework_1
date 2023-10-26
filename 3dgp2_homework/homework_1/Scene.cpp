@@ -192,10 +192,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_pDescriptorHeap = new CDescriptorHeap();
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 1 + 1 + 4 + 1 + 6 + 1); //SuperCobra(17), Gunship(2), Mi24(1, player), Skybox(1), Terrain(4), Water(1), billboard(6), Missile(1)//// Gunship(2)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 1 + 1 + 4 + 1 + 6 + 1 + 1); //SuperCobra(17), Gunship(2), Mi24(1, player), Skybox(1),
+																					//Terrain(4), Water(1), billboard(6), Missile(1), Explosion_sprite(1) // Gunship(2)
 
 	CHelicopterPlayer* pAirplanePlayer = new CHelicopterPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
-	pAirplanePlayer->SetPosition(XMFLOAT3(5100.0f, 1000.0f, 2560.0f ));
+	pAirplanePlayer->SetPosition(XMFLOAT3(2560.0f, 1000.0f, 2560.0f ));
 	//pAirplanePlayer->Rotate(0.0f, 165.0f, 0.0f);
 	m_pPlayer = pAirplanePlayer;
 
@@ -210,7 +211,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/512x512_terrain.raw"), 513, 513, 513, 513, xmf3Scale, xmf4Color);
 	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/billboard_pos.raw"), 2049, 2049, 2049, 2049, xmf3Scale, xmf4Color, 1);
 
-	m_nShaders = 3;
+	m_nShaders = 4;
 	m_ppShaders = new CShader*[m_nShaders];
 	
 	CObjectsShader* pObjectsShader = new CObjectsShader();
@@ -222,13 +223,18 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pBillboardObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pTerrain);
 	pBillboardObjectsShader->SetCamera(m_pPlayer->GetCamera());
 
+	CSpriteObjectsShader* pSpriteObjectsShader = new CSpriteObjectsShader();
+	pSpriteObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
+	pSpriteObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), nullptr);
+
 	CTransparentOjectsShader* pTransparentObjectsShader = new CTransparentOjectsShader();
 	pTransparentObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pTransparentObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pPlayer);
 	
 	m_ppShaders[0] = pObjectsShader;
 	m_ppShaders[1] = pBillboardObjectsShader;
-	m_ppShaders[2] = pTransparentObjectsShader;
+	m_ppShaders[2] = pSpriteObjectsShader;
+	m_ppShaders[3] = pTransparentObjectsShader;
 
 	m_pCollision = new CCollision;
 	m_pCollision->SetPlayer(m_pPlayer);
@@ -332,7 +338,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[2].Constants.Num32BitValues = 33;
+	pd3dRootParameters[2].Constants.Num32BitValues = 37;
 	pd3dRootParameters[2].Constants.ShaderRegister = 2; //GameObject
 	pd3dRootParameters[2].Constants.RegisterSpace = 0;
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;

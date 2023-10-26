@@ -23,7 +23,7 @@ class CGameObject;
 class CTexture
 {
 public:
-	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters);
+	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters, int nRows = 1, int nCols = 1);
 	virtual ~CTexture();
 
 	void AddRef() { m_nReferences++; }
@@ -59,6 +59,11 @@ public:
 	int GetBufferElements(int nIndex) { return(m_pnBufferElements[nIndex]); }
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(int nIndex);
+	
+	// for sprite texture
+	void CTexture::AnimateRowColumn(float fTime);
+	UINT GetColumns() const { return m_nColumns; };
+	UINT GetRows() const { return m_nRows; };
 
 private:
 	int								m_nReferences = 0;
@@ -83,6 +88,11 @@ private:
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE*	m_pd3dSamplerGpuDescriptorHandles = nullptr;
 
+	UINT							m_nColumns = 1;
+	UINT							m_nRows = 1;
+
+	UINT							m_nColumn = 0;
+	UINT							m_nRow = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,13 +107,13 @@ private:
 
 class CGameObject;
 
-struct MATERIAL
-{
-	XMFLOAT4						m_xmf4Ambient;
-	XMFLOAT4						m_xmf4Diffuse;
-	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
-	XMFLOAT4						m_xmf4Emissive;
-};
+//struct MATERIAL
+//{
+//	XMFLOAT4						m_xmf4Ambient;
+//	XMFLOAT4						m_xmf4Diffuse;
+//	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
+//	XMFLOAT4						m_xmf4Emissive;
+//};
 
 class CMaterial
 {
@@ -125,7 +135,7 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 public:
-	CShader							*m_pShader = nullptr;
+	CShader*						m_pShader = nullptr;
 	CTexture*						m_pTexture = nullptr;
 
 	XMFLOAT4						m_xmf4AlbedoColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -371,9 +381,15 @@ private:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CBillboardObject : public CGameObject
+class CSpriteObject : public CGameObject
 {
 public:
-	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-	~CBillboardObject();
+	CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	~CSpriteObject();
+
+	virtual void Animate(float fTimeElapsed) override;
+
+private:
+	float m_fSpeed = 0.1f;
+	float m_fTime = 0.0f;
 };

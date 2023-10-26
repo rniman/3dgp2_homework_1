@@ -225,8 +225,34 @@ private:
 
 	CHeightMapImage* m_pHeightMapImage = nullptr;
 
-			
 	ComPtr<ID3D12Resource> m_pd3dcbGameObjects;
 	VS_VB_INSTANCE* m_pcbMappedGameObjects = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW m_d3dInstancingBufferView;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CSpriteObjectsShader : public CShader
+{
+public:
+	CSpriteObjectsShader();
+	~CSpriteObjectsShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+	virtual D3D12_BLEND_DESC CreateBlendState();
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
+	virtual void ReleaseObjects();
+
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+
+	virtual void ReleaseUploadBuffers();
+private:
+	CGameObject** m_ppObjects = nullptr;
+	int m_nObjects = 0;
 };

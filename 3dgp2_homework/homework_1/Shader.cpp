@@ -772,7 +772,7 @@ CBillBoardObjectsShader::CBillBoardObjectsShader(LPCTSTR pFileName, int nWidth, 
 
 CBillBoardObjectsShader::~CBillBoardObjectsShader()
 {
-	if (m_pHeightMapImage) delete m_pHeightMapImage;
+	//if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
 
 D3D12_INPUT_LAYOUT_DESC CBillBoardObjectsShader::CreateInputLayout()
@@ -804,7 +804,6 @@ D3D12_SHADER_BYTECODE CBillBoardObjectsShader::CreatePixelShader()
 {
 	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSTextured.cso", &m_pd3dPixelShaderBlob);
 }
-
 
 D3D12_BLEND_DESC CBillBoardObjectsShader::CreateBlendState()
 {
@@ -1073,6 +1072,10 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 
 void CBillBoardObjectsShader::ReleaseObjects()
 {
+	CShader::ReleaseObjects();
+
+	if (m_pHeightMapImage) delete m_pHeightMapImage;
+
 	//if (m_ppObjects)
 	//{
 	//	for (int j = 0; j < m_nObjects; j++) 
@@ -1088,7 +1091,6 @@ void CBillBoardObjectsShader::ReleaseObjects()
 
 void CBillBoardObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-
 }
 
 void CBillBoardObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
@@ -1111,4 +1113,137 @@ void CBillBoardObjectsShader::ReleaseUploadBuffers()
 	{
 		objects[0].ReleaseUploadBuffers();
 	}	
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CSpriteObjectsShader::CSpriteObjectsShader()
+{
+}
+
+CSpriteObjectsShader::~CSpriteObjectsShader()
+{
+}
+
+D3D12_INPUT_LAYOUT_DESC CSpriteObjectsShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 2;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
+}
+
+D3D12_SHADER_BYTECODE CSpriteObjectsShader::CreateVertexShader()
+{
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSSpriteAnimation.cso", &m_pd3dVertexShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CSpriteObjectsShader::CreatePixelShader()
+{
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSTextured.cso", &m_pd3dPixelShaderBlob);
+}
+
+D3D12_BLEND_DESC CSpriteObjectsShader::CreateBlendState()
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = TRUE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+
+void CSpriteObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates.reserve(m_nPipelineStates);
+
+	for (int i = 0; i < m_nPipelineStates; ++i)
+	{
+		m_ppd3dPipelineStates.emplace_back(ComPtr<ID3D12PipelineState>());
+	}
+
+	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
+	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
+
+	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+void CSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CTexture* pSpriteTexture;
+	pSpriteTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
+	pSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pSpriteTexture, 0, 3);
+	
+	CMaterial* pMaterial;
+	pMaterial = new CMaterial();
+	pMaterial->SetTexture(pSpriteTexture);
+
+	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 500.0f, 500.0f, 0.0f);
+	CSpriteObject* pSpriteObject = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pSpriteObject->SetMaterial(0, pMaterial);
+	pSpriteObject->SetMesh(0, pSpriteMesh);
+	pSpriteObject->SetPosition(2560.f, 1000.0f, 3000.0f);
+
+	m_nObjects = 1;
+	m_ppObjects = new CGameObject*[m_nObjects];
+	m_ppObjects[0] = pSpriteObject;
+}
+
+void CSpriteObjectsShader::ReleaseObjects()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Release();
+		delete[] m_ppObjects;
+	}
+}
+
+void CSpriteObjectsShader::AnimateObjects(float fTimeElapsed)
+{
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->Animate(fTimeElapsed);
+		}
+	}
+}
+
+void CSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->UpdateTransform();
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+		}
+	}
+}
+
+void CSpriteObjectsShader::ReleaseUploadBuffers()
+{
 }

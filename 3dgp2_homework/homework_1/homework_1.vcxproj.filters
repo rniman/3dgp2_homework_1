@@ -164,7 +164,7 @@
     <FxCompile Include="PSOcean.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="VSTextured.hlsl">
+    <FxCompile Include="VSSpriteAnimation.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="PSTextured.hlsl">
