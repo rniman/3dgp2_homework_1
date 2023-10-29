@@ -82,8 +82,6 @@ protected:
 	CShader*	m_pShader = nullptr;
 };
 
-constexpr unsigned short MAX_NUM_MISSILE = 10;
-
 class CHelicopterPlayer : public CPlayer
 {
 public:
@@ -103,6 +101,7 @@ public:
 	virtual void OnPrepareRender();
 
 	void Fire();
+	virtual void SufferDamage(int nDamage) override;
 
 	// interface
 	virtual void SetOOBB() override;
@@ -115,14 +114,18 @@ public:
 			return nullptr;
 		return m_arraypMissile[nIndex]; 
 	};
+
+	void SetExplosion(CGameObject* pExplosion, int nIndex) { m_ppExplosionAnimation[nIndex] = pExplosion; };
 private:
 	CGameObject* m_pMainBodyFrame = nullptr;
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
 	CGameObject* m_pMissileObject = nullptr;
+	std::array<CGameObject*, 3> m_ppExplosionAnimation;
 
 	std::array<CMissile*, MAX_NUM_MISSILE> m_arraypMissile;
 
+	int   m_nHealthPoint = 10;
 	float m_fCoolTime = 0.0f;
 };
 

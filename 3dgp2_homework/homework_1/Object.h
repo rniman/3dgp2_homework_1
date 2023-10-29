@@ -9,6 +9,7 @@
 
 class CShader;
 class CStandardShader;
+constexpr unsigned short MAX_NUM_MISSILE = 10;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -233,6 +234,7 @@ public:
 
 	static void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 
+	virtual void SufferDamage(int nDamage) {};
 	// interface
 	virtual void SetOOBB();
 	BoundingOrientedBox GetOOBB() const { return m_OOBB; };
@@ -275,40 +277,96 @@ public:
 	CSuperCobraObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CSuperCobraObject();
 
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) {};
+
 	virtual void PrepareOOBB() override;
 	virtual void PrepareAnimate() override;
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Collide(CGameObject* pCollidedObject = nullptr, float fTimeElapsed = 0.0f) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override {};
 
+	virtual void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false) override;
+	void Fire();
+	
+	// interface
 	virtual void SetOOBB() override;
 
-	virtual class CMissile* GetMissile(int nIndex) { return nullptr; };
+	float GetCoolTime() const { return m_fCoolTime; };
+	void SetCoolTime(float fCoolTime) { m_fCoolTime = fCoolTime; };
+
+	virtual class CMissile* GetMissile(int nIndex) { return m_arraypMissile[nIndex]; };
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
 	CGameObject* m_pMainBodyFrame = nullptr;
+
+	XMFLOAT3	m_xmf3Velocity;
+	XMFLOAT3    m_xmf3Gravity;
+	float       m_fMaxVelocityXZ;
+	float       m_fMaxVelocityY;
+	float       m_fFriction;
+
+	CGameObject* m_pTarget = nullptr;
+
+	CGameObject* m_pMissileObject = nullptr;
+	std::array<CMissile*, MAX_NUM_MISSILE> m_arraypMissile;
+
+	float m_fCoolTime = 0.0f;
 };
 
 class CGunshipObject : public CGameObject
 {
 public:
 	CGunshipObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	CGunshipObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CGameObject* pMissileObjectModel, void* pTarget);
 	virtual ~CGunshipObject();
 
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+
 	virtual void PrepareOOBB() override;
-
-	virtual void PrepareAnimate();
-	virtual void Animate(float fTimeElapsed);
+	virtual void PrepareAnimate() override;
+	virtual void Animate(float fTimeElapsed) override;
 	virtual void Collide(CGameObject* pCollidedObject = nullptr, float fTimeElapsed = 0.0f) override;
-	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override;
 
+	virtual void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false) override;
+	void Decelerate(float fTimeElapsed);
+
+	void Fire();
+	void Find(float fTimeElapsed);
+	void Chase(float fTimeElapsed);
+	virtual void SufferDamage(int nDamage) override;
+
+	// interface
 	virtual void SetOOBB() override;
+	
+	void SetTarget(CGameObject* pTarget) { m_pTarget = pTarget; };
 
-	virtual class CMissile* GetMissile(int nIndex) { return nullptr; };
+	float GetCoolTime() const { return m_fCoolTime; };
+	void SetCoolTime(float fCoolTime) { m_fCoolTime = fCoolTime; };
+
+	virtual class CMissile* GetMissile(int nIndex) { return m_arraypMissile[nIndex]; };
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
 	CGameObject* m_pMainBodyFrame = nullptr;
+
+	XMFLOAT3	mxmf3Position;
+
+	XMFLOAT3	m_xmf3Velocity;
+	XMFLOAT3    m_xmf3Gravity;
+	float       m_fMaxVelocityXZ;
+	float       m_fMaxVelocityY;
+	float       m_fFriction;
+
+	CGameObject* m_pTarget= nullptr;
+
+	std::array<CMissile*, MAX_NUM_MISSILE> m_arraypMissile;
+
+	int   m_nHealthPoint = 1;
+	float m_fFireCoolTime = 0.0f;
+	float m_fCoolTime = 0.0f;
+	float m_fRotateSpeed = 180.0f;
 };
 
 class CMi24Object : public CGameObject
@@ -384,11 +442,12 @@ private:
 class CSpriteObject : public CGameObject
 {
 public:
-	CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMesh, int nMaterial);
 	~CSpriteObject();
 
 	virtual void Animate(float fTimeElapsed) override;
 
+	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; };
 private:
 	float m_fSpeed = 0.1f;
 	float m_fTime = 0.0f;

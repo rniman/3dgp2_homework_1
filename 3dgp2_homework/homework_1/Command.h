@@ -145,3 +145,24 @@ private:
 	std::unique_ptr<CBaseCommand> button_camera_rotate_y;
 	std::unique_ptr<CBaseCommand> button_fire;
 };
+
+class CEnemyInputHandler : public CBaseInputHandler
+{
+public:
+	CEnemyInputHandler()
+		: CBaseInputHandler()
+	{
+	}
+
+	virtual ~CEnemyInputHandler() {};
+	virtual void HandleInput(CGameObject& gameObject) override {};
+
+private:
+	std::unique_ptr<CBaseCommand> button_forward;
+	std::unique_ptr<CBaseCommand> button_backward;
+	std::unique_ptr<CBaseCommand> button_right;
+	std::unique_ptr<CBaseCommand> button_left;
+	std::unique_ptr<CBaseCommand> button_up;
+	std::unique_ptr<CBaseCommand> button_down;
+	std::unique_ptr<CBaseCommand> button_fire;
+};

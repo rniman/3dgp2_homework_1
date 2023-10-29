@@ -367,7 +367,8 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 	XMFLOAT3 xmf3Position;
     xmf3Position.x = xmf3Center.x + fRadius * sin(fAngle);
-    xmf3Position.y = xmf3Center.y - (nColumn * float(nColumnSpace) / 2.0f) + (nColumn * nColumnSpace) + Random();
+    //xmf3Position.y = xmf3Center.y - (nColumn * float(nColumnSpace) / 2.0f) + (nColumn * nColumnSpace) + Random();
+	xmf3Position.y = 1000.0f;
     xmf3Position.z = xmf3Center.z + fRadius * cos(fAngle);
 
 	return(xmf3Position);
@@ -380,62 +381,74 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
 	CGameObject* pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
 	//CGameObject* pMissileModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/hellfire.bin", this);
-
+	
 	int nColumnSpace = 5, nColumnSize = 30;           
     int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
 
+  //  for (int h = 0; h < nFirstPassColumnSize; h++)
+  //  {
+  //      for (int i = 0; i < floor(float(m_nObjects) / float(nColumnSize)); i++)
+  //      {
+		//	if (nObjects % 2)
+		//	{
+		//		m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		//		m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
+		//		m_ppObjects[nObjects]->PrepareOOBB();
+		//		pSuperCobraModel->AddRef();
+		//	}
+		//	else
+		//	{
+		//		m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		//		m_ppObjects[nObjects]->SetChild(pGunshipModel);
+		//		m_ppObjects[nObjects]->PrepareOOBB();
+		//		pGunshipModel->AddRef();
+		//	}
+		//	XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace);
+		//	m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
+		//	m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+		//	m_ppObjects[nObjects++]->PrepareAnimate();
+		//}
+  //  }
+	CGameObject* pMissileModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/hellfire.bin", this);
 	int nObjects = 0;
-    for (int h = 0; h < nFirstPassColumnSize; h++)
-    {
-        for (int i = 0; i < floor(float(m_nObjects) / float(nColumnSize)); i++)
-        {
-			if (nObjects % 2)
-			{
-				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
-				m_ppObjects[nObjects]->PrepareOOBB();
-				pSuperCobraModel->AddRef();
-			}
-			else
-			{
-				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pGunshipModel);
-				m_ppObjects[nObjects]->SetChild(pGunshipModel);
-				m_ppObjects[nObjects]->PrepareOOBB();
-				pGunshipModel->AddRef();
-			}
-			XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace);
-			m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
-			m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
-			m_ppObjects[nObjects++]->PrepareAnimate();
-		}
-    }
+	std::uniform_int_distribution<int> uid(20, 150);
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		m_ppObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pMissileModel, pContext);
+		m_ppObjects[i]->SetChild(pGunshipModel);
+		m_ppObjects[i]->PrepareOOBB();
+		pGunshipModel->AddRef();
 
-    if (nFirstPassColumnSize != nColumnSize)
-    {
-        for (int i = 0; i < m_nObjects - int(floor(float(m_nObjects) / float(nColumnSize)) * nFirstPassColumnSize); i++)
-        {
-			if (nObjects % 2)
-			{
-				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
-				m_ppObjects[nObjects]->PrepareOOBB();
-				pSuperCobraModel->AddRef();
-			}
-			else
-			{
-				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pGunshipModel);
-				m_ppObjects[nObjects]->PrepareOOBB();
-				pGunshipModel->AddRef();
-			}
-			XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace);
-			m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 850.0f, xmf3RandomPosition.z);
-			//m_ppObjects[nObjects]->SetScale(10.0f, 10.0f, 10.0f);
-			m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
-			m_ppObjects[nObjects++]->PrepareAnimate();
-        }
-    }
+		XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(2560.0f, 0.0f, 2560.0f), 2560.0f, 0, 0);
+		m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y, xmf3RandomPosition.z);
+		m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+		m_ppObjects[nObjects++]->PrepareAnimate();
+	}
+
+   // if (nFirstPassColumnSize != nColumnSize)
+   // {
+   //     for (int i = 0; i < m_nObjects - int(floor(float(m_nObjects) / float(nColumnSize)) * nFirstPassColumnSize); i++)
+   //     {
+			//if (nObjects % 2)
+			//{
+			//	m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			//	m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
+			//	m_ppObjects[nObjects]->PrepareOOBB();
+			//	pSuperCobraModel->AddRef();
+			//}
+			//else
+			//{
+			//	m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			//	m_ppObjects[nObjects]->SetChild(pGunshipModel);
+			//	m_ppObjects[nObjects]->PrepareOOBB();
+			//	pGunshipModel->AddRef();
+			//}
+			//XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace);
+			//m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 850.0f, xmf3RandomPosition.z);
+			//m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+			//m_ppObjects[nObjects++]->PrepareAnimate();
+   //     }
+   // }
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -1150,6 +1163,26 @@ D3D12_SHADER_BYTECODE CSpriteObjectsShader::CreatePixelShader()
 	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSTextured.cso", &m_pd3dPixelShaderBlob);
 }
 
+D3D12_RASTERIZER_DESC CSpriteObjectsShader::CreateRasterizerState()
+{
+	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
+	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	//	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.FrontCounterClockwise = TRUE;
+	d3dRasterizerDesc.DepthBias = 0;
+	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 0.0f;
+	d3dRasterizerDesc.DepthClipEnable = TRUE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
+	d3dRasterizerDesc.ForcedSampleCount = 0;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return(d3dRasterizerDesc);
+}
+
 D3D12_BLEND_DESC CSpriteObjectsShader::CreateBlendState()
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
@@ -1190,24 +1223,65 @@ void CSpriteObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 void CSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CTexture* pSpriteTexture;
-	pSpriteTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
-	pSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
-	CScene::CreateShaderResourceViews(pd3dDevice, pSpriteTexture, 0, 3);
-	
-	CMaterial* pMaterial;
-	pMaterial = new CMaterial();
-	pMaterial->SetTexture(pSpriteTexture);
 
-	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 500.0f, 500.0f, 0.0f);
-	CSpriteObject* pSpriteObject = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	pSpriteObject->SetMaterial(0, pMaterial);
-	pSpriteObject->SetMesh(0, pSpriteMesh);
-	pSpriteObject->SetPosition(2560.f, 1000.0f, 3000.0f);
+}
 
-	m_nObjects = 1;
-	m_ppObjects = new CGameObject*[m_nObjects];
-	m_ppObjects[0] = pSpriteObject;
+void CSpriteObjectsShader::BuildPlayerSpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CTexture* pSpriteTexture[3];
+
+	pSpriteTexture[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
+	pSpriteTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
+
+	pSpriteTexture[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 4, 4);
+	pSpriteTexture[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/explode.dds", RESOURCE_TEXTURE2D, 0);
+
+	pSpriteTexture[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 4, 4);
+	pSpriteTexture[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion_Smoke.dds", RESOURCE_TEXTURE2D, 0);
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pSpriteTexture[0], 0, 3);
+	CScene::CreateShaderResourceViews(pd3dDevice, pSpriteTexture[1], 0, 3);
+	CScene::CreateShaderResourceViews(pd3dDevice, pSpriteTexture[2], 0, 3);
+
+	CMaterial* pMaterial[3];
+	pMaterial[0] = new CMaterial();
+	pMaterial[0]->SetTexture(pSpriteTexture[0]);
+	pMaterial[1] = new CMaterial();
+	pMaterial[1]->SetTexture(pSpriteTexture[1]);
+	pMaterial[2] = new CMaterial();
+	pMaterial[2]->SetTexture(pSpriteTexture[2]);
+
+	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 7.0f, 7.0f, 0.0f);
+	CSpriteObject* pSpriteObject[3];
+
+	pSpriteObject[0] = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1);
+	pSpriteObject[0]->SetMaterial(0, pMaterial[0]);
+	pSpriteObject[0]->SetMesh(0, pSpriteMesh);
+	pSpriteObject[0]->SetAlive(false);
+	pSpriteObject[0]->SetSpeed(0.05f);
+
+	pSpriteObject[1] = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1);
+	pSpriteObject[1]->SetMaterial(0, pMaterial[1]);
+	pSpriteObject[1]->SetMesh(0, pSpriteMesh);
+	pSpriteObject[1]->SetAlive(false);
+	pSpriteObject[1]->SetSpeed(0.08f);
+
+	pSpriteObject[2] = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1);
+	pSpriteObject[2]->SetMaterial(0, pMaterial[2]);
+	pSpriteObject[2]->SetMesh(0, pSpriteMesh);
+	pSpriteObject[2]->SetAlive(false);
+	pSpriteObject[2]->SetSpeed(0.1f);
+
+	CHelicopterPlayer* pPlayer = (CHelicopterPlayer*)pContext;
+	pPlayer->SetExplosion(pSpriteObject[0], 0);
+	pPlayer->SetExplosion(pSpriteObject[1], 1);
+	pPlayer->SetExplosion(pSpriteObject[2], 2);
+
+	m_nObjects = 3;
+	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects[0] = pSpriteObject[0];
+	m_ppObjects[1] = pSpriteObject[1];
+	m_ppObjects[2] = pSpriteObject[2];
 }
 
 void CSpriteObjectsShader::ReleaseObjects()
@@ -1225,6 +1299,9 @@ void CSpriteObjectsShader::AnimateObjects(float fTimeElapsed)
 	{
 		if (m_ppObjects[j])
 		{
+			if (!m_ppObjects[j]->GetAlive())
+				continue;
+
 			m_ppObjects[j]->Animate(fTimeElapsed);
 		}
 	}
@@ -1238,6 +1315,9 @@ void CSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CC
 	{
 		if (m_ppObjects[j])
 		{
+			if (!m_ppObjects[j]->GetAlive())
+				continue;
+
 			m_ppObjects[j]->UpdateTransform();
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}

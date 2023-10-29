@@ -7,44 +7,36 @@ void CForwardCommand::execute(CGameObject& gameObject)
 {
 	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), gameObject.GetLook(), 10.0f);
 	gameObject.Move(shift, true);
-
-	//CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	//player->Move(shift, true);
 }
 
 void CBackwardCommand::execute(CGameObject& gameObject)
 {
-	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetLook(), -10.0f);
-	player->Move(shift, true);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), gameObject.GetLook(), -10.0f);
+	gameObject.Move(shift, true);
 }
 
 void CRightCommand::execute(CGameObject& gameObject)
 {
-	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), 10.0f);
-	player->Move(shift, true);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), gameObject.GetRight(), 10.0f);
+	gameObject.Move(shift, true);
 }
 
 void CLeftCommand::execute(CGameObject& gameObject)
 {
-	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetRight(), -10.0f);
-	player->Move(shift, true);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), gameObject.GetRight(), -10.0f);
+	gameObject.Move(shift, true);
 }
 
 void CUpCommand::execute(CGameObject& gameObject)
 {
-	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetUp(), 10.0f);
-	player->Move(shift, true);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), gameObject.GetUp(), 10.0f);
+	gameObject.Move(shift, true);
 }
 
 void CDownCommand::execute(CGameObject& gameObject)
 {
-	CPlayer* player = dynamic_cast<CPlayer*>(&gameObject);
-	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), player->GetUp(), -10.0f);
-	player->Move(shift, true);
+	XMFLOAT3 shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), gameObject.GetUp(), -10.0f);
+	gameObject.Move(shift, true);
 }
 
 void CCameraRotateYCommand::execute(CGameObject& gameObject)
@@ -68,18 +60,30 @@ void CCameraRotateYCommand::execute(CGameObject& gameObject)
 
 void CFireCommand::execute(CGameObject& gameObject)
 {
-	CHelicopterPlayer* player = dynamic_cast<CHelicopterPlayer*>(&gameObject);
-	if (player->GetCoolTime() > 0.0f)
-		return;
+	/*if (dynamic_cast<CHelicopterPlayer*>(&gameObject))
+	{
+		CGunshipObject* gunshipObject = dynamic_cast<CGunshipObject*>(&gameObject);
+		if (gunshipObject->GetCoolTime() > 0.0f)
+			return;
 
-	player->SetCoolTime(2.0f);
-	player->Fire();
+		gunshipObject->SetCoolTime(2.0f);
+		gunshipObject->Fire();
+	}*/
+	if(dynamic_cast<CHelicopterPlayer*>(&gameObject))
+	{
+		CHelicopterPlayer* player = dynamic_cast<CHelicopterPlayer*>(&gameObject);
+		if (player->GetCoolTime() > 0.0f)
+			return;
 
-	char buf[256];
-	
-	char err[] = "KeyDown Fire";
-	sprintf_s(buf, sizeof(buf), "Debug: %s\n", err);
-	OutputDebugStringA(buf);
+		player->SetCoolTime(2.0f);
+		player->Fire();
+
+		char buf[256];
+
+		char err[] = "KeyDown Fire";
+		sprintf_s(buf, sizeof(buf), "Debug: %s\n", err);
+		OutputDebugStringA(buf);
+	}
 }
 
 UCHAR CBaseInputHandler::m_spKeysBuffer[] = {};

@@ -87,7 +87,7 @@ public:
 	bool ProcessInput(UCHAR *pKeysBuffer);
     void AnimateObjects(float fTimeElapsed);
 	void ProcessCollide(float fTimeElapsed);
-    void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=nullptr);
+    void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = nullptr);
 
 	void ReleaseUploadBuffers();
 

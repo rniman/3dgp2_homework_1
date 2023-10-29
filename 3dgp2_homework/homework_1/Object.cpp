@@ -8,6 +8,8 @@
 #include "Scene.h"
 #include "Player.h"
 
+extern default_random_engine dre;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters, int nRows, int nCols)
@@ -983,6 +985,10 @@ void CSuperCobraObject::Collide(CGameObject* pCollidedObject, float fTimeElapsed
 {
 }
 
+void CSuperCobraObject::Move(const XMFLOAT3& xmf3Shift, bool bVelocity)
+{
+}
+
 void CSuperCobraObject::SetOOBB()
 {
 	m_pMainBodyFrame->GetMesh(0)->GetOOBB().Transform(m_OOBB, XMLoadFloat4x4(&m_xmf4x4Local));
@@ -991,12 +997,47 @@ void CSuperCobraObject::SetOOBB()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(0, 0)
+CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) 
+	: CGameObject(0, 0)
 {
+	std::uniform_int_distribution<int> uid(2, 6);
+
+	m_fMaxVelocityXZ = 150.0f;
+	m_fMaxVelocityY = 150.0f;
+	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_fFriction = 300.0f;
+	m_fFireCoolTime = float(uid(dre));
+}
+
+CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pMissileObjectModel, void* pTarget)
+	: CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature)
+{
+	for (auto& missile : m_arraypMissile)
+	{
+		missile = new CMissile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		missile->SetChild(pMissileObjectModel);
+		missile->PrepareOOBB();
+		pMissileObjectModel->AddRef();
+	}
+
+	m_pTarget = (CHelicopterPlayer*)pTarget;
 }
 
 CGunshipObject::~CGunshipObject()
 {
+}
+
+void CGunshipObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CGameObject::UpdateShaderVariable(pd3dCommandList);
+
+	for (auto& missile : m_arraypMissile)
+	{
+		if (!missile->GetAlive())
+			continue;
+
+		missile->UpdateShaderVariable(pd3dCommandList);
+	}
 }
 
 void CGunshipObject::PrepareOOBB()
@@ -1013,6 +1054,24 @@ void CGunshipObject::PrepareAnimate()
 
 void CGunshipObject::Animate(float fTimeElapsed)
 {
+	if (!m_bAlive)
+	{
+		return;
+	}
+
+	if (m_fCoolTime > 0.0f)
+	{
+		m_fCoolTime -= fTimeElapsed;
+	}
+	else
+	{
+		// fire
+		SetCoolTime(m_fFireCoolTime);
+		Fire();
+	}
+
+	Find(fTimeElapsed);
+
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
@@ -1027,10 +1086,174 @@ void CGunshipObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 
 	SetOOBB();
+
+	for (auto& missile : m_arraypMissile)
+	{
+		if (!missile->GetAlive())
+			continue;
+
+		missile->Animate(fTimeElapsed);
+	}
 }
 
 void CGunshipObject::Collide(CGameObject* pCollidedObject, float fTimeElapsed)
 {
+}
+
+void CGunshipObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
+
+	for (auto& missile : m_arraypMissile)
+	{
+		if (!missile->GetAlive())
+			continue;
+
+		missile->UpdateTransform();
+		missile->Render(pd3dCommandList, pCamera);
+	}
+}
+
+void CGunshipObject::Move(const XMFLOAT3& xmf3Shift, bool bVelocity)
+{
+	if (bVelocity)
+	{
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
+	}
+	else
+	{
+		XMFLOAT3 xmf3Position = GetPosition();
+		SetPosition(Vector3::Add(xmf3Position, xmf3Shift));
+	}
+}
+
+void CGunshipObject::Decelerate(float fTimeElapsed)
+{
+	float fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = (m_fFriction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+}
+
+void CGunshipObject::Fire()
+{
+	for (auto& missile : m_arraypMissile)
+	{
+		if (missile->GetAlive())
+		{
+			continue;
+		}
+
+		missile->SetAlive(true);
+		missile->SetLifeTime();
+
+		XMFLOAT3 missilePos = XMFLOAT3{ 0, 1.25, 5 };
+
+		XMFLOAT4X4 matrix = Matrix4x4::Identity();
+		XMStoreFloat4x4(&matrix, XMMatrixTranslation(missilePos.x, missilePos.y, missilePos.z));
+
+		missile->SetLocalTransform(Matrix4x4::Multiply(matrix, m_xmf4x4Local));
+		break;
+	}
+}
+
+void CGunshipObject::SufferDamage(int nDamage)
+{
+	m_nHealthPoint -= nDamage;
+	if (m_nHealthPoint <= 0)
+	{
+		m_bAlive = false;
+	}
+}
+
+void CGunshipObject::Find(float fTimeElapsed)
+{
+	// 타겟까지의 방향벡터
+	XMFLOAT3 xmf3Target = Vector3::Add(m_pTarget->GetPosition(), GetPosition(), -1);
+	
+	XMFLOAT3 xmf3TargetXZ = Vector3::Normalize(xmf3Target);
+	xmf3TargetXZ.y = 0.0f;
+	xmf3TargetXZ = Vector3::Normalize(xmf3TargetXZ);
+
+	XMFLOAT3 xmf3Angle;
+	XMStoreFloat3(&xmf3Angle, XMVector2AngleBetweenNormals(XMLoadFloat3(&GetLook()), XMLoadFloat3(&xmf3TargetXZ)));
+
+	// 현재 객체에서 타겟까지의 각도를 계산
+	float fAngleToTarget = XMConvertToDegrees(xmf3Angle.x);
+	// 회전할 각도를 시간에 비례하여 계산
+	float fMaxRotateAngle = m_fRotateSpeed * fTimeElapsed;
+	// 회전 각도를 최대 회전 속도로 제한
+	float fDegree = min(fAngleToTarget, fMaxRotateAngle);
+
+
+
+	if (Vector3::CrossProduct(GetLook(), xmf3TargetXZ).y > 0.0f && fDegree > EPSILON)
+	{
+		Rotate(0.0f, fDegree, 0.0f);
+	}
+	else if (Vector3::CrossProduct(GetLook(), xmf3TargetXZ).y < 0.0f && fDegree > EPSILON)
+	{
+		Rotate(0.0f, -fDegree, 0.0f);
+	}
+
+	// 이동
+	if (xmf3Target.x * xmf3Target.x + xmf3Target.z * xmf3Target.z > 10000.0f)
+	{
+		XMFLOAT3 xmf3Shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), xmf3TargetXZ, 10.0f);
+		Move(xmf3Shift, true);
+	}
+
+	XMFLOAT3 xmf3TargetY = xmf3Target;
+	xmf3TargetY.x = xmf3TargetY.z = 0.0f;
+	xmf3TargetY = Vector3::Normalize(xmf3TargetY);
+
+	if (xmf3Target.y * xmf3Target.y > 100.0f)
+	{
+		XMFLOAT3 xmf3Shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), xmf3TargetY, 10.0f);
+		Move(xmf3Shift, true);
+	}
+	else if (m_xmf3Velocity.y * m_xmf3Velocity.y < 100.0f && xmf3Target.y * xmf3Target.y > 4.0f)
+	{
+		XMFLOAT3 xmf3Shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), xmf3TargetY, 5.0f * fTimeElapsed);
+		Move(xmf3Shift, false);
+	}
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = m_fMaxVelocityXZ;
+	if (fLength > m_fMaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	}
+	float fMaxVelocityY = m_fMaxVelocityY;
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+
+	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+	Move(xmf3Velocity, false);
+	Decelerate(fTimeElapsed);
+}
+
+void CGunshipObject::Chase(float fTimeElapsed)
+{
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = m_fMaxVelocityXZ;
+	if (fLength > m_fMaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	}
+	float fMaxVelocityY = m_fMaxVelocityY;
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+
+	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+	Move(xmf3Velocity, false);
+	//Decelerate(fTimeElapsed);
 }
 
 void CGunshipObject::SetOOBB()
@@ -1038,53 +1261,6 @@ void CGunshipObject::SetOOBB()
 	m_pMainBodyFrame->GetMesh(0)->GetOOBB().Transform(m_OOBB, XMLoadFloat4x4(&m_xmf4x4Local));
 	XMStoreFloat4(&m_OOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_OOBB.Orientation)));
 }
-
-//void CGunshipObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-//{
-//	// 하는거 없는 상태
-//	OnPrepareRender();
-//
-//	UpdateShaderVariable(pd3dCommandList);
-//
-//	if (m_nMaterials > 1)
-//	{
-//		for (int i = 0; i < m_nMaterials; i++)
-//		{
-//			if (m_ppMaterials[i])
-//			{
-//				if (m_ppMaterials[i]->m_pShader)
-//				{
-//					m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
-//				}
-//				m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
-//			}
-//
-//			if (m_nMeshes == 1)
-//			{
-//				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i);
-//			}
-//		}
-//	}
-//	else
-//	{
-//		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
-//		{
-//			if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
-//			m_ppMaterials[0]->UpdateShaderVariables(pd3dCommandList);
-//		}
-//
-//		if (m_ppMeshes)
-//		{
-//			for (int i = 0; i < m_nMeshes; i++)
-//			{
-//				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0);
-//			}
-//		}
-//	}
-//
-//	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-//	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
-//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1258,8 +1434,8 @@ void COceanObjcet::SetPlayer(CPlayer* pPlayer)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CSpriteObject::CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
-	: CGameObject(1, 1)
+CSpriteObject::CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes, int nMaterials)
+	: CGameObject(nMeshes, nMaterials)
 {
 }
 
@@ -1269,14 +1445,17 @@ CSpriteObject::~CSpriteObject()
 
 void CSpriteObject::Animate(float fTimeElapsed)
 {
-	if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+	for (int i = 0; i < m_nMaterials; ++i)
 	{
-		m_fTime += fTimeElapsed * 0.5f;
-		if (m_fTime >= m_fSpeed) 
+		if (m_ppMaterials[i])
 		{
-			m_fTime = 0.0f;
+			m_fTime += fTimeElapsed * 0.5f;
+			if (m_fTime >= m_fSpeed)
+			{
+				m_fTime = 0.0f;
+			}
+			m_ppMaterials[i]->m_pTexture->AnimateRowColumn(m_fTime);
 		}
-		m_ppMaterials[0]->m_pTexture->AnimateRowColumn(m_fTime);
 	}
 }
 

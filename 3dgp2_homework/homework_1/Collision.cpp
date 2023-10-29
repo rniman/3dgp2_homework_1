@@ -46,6 +46,7 @@ void CCollision::CheckPlayerBulletCollisions(float fTimeElapsed)
 				continue;
 			}
 
+			enemy->SufferDamage(1);
 			m_pPlayerMissiles[i]->Collide();
 		}
 	}
@@ -57,6 +58,21 @@ void CCollision::CheckEnemyCollisions(float fTimeElapsed)
 
 void CCollision::CheckEnemyBulletCollisions(float fTimeElapsed)
 {
+	for (auto& enemyMissile : m_pEnemyMissiles)
+	{
+		if(!enemyMissile->GetAlive())
+		{
+			continue;
+		}
+
+		if (!enemyMissile->GetOOBB().Intersects(m_pPlayer->GetOOBB()))
+		{
+			continue;
+		}
+
+		m_pPlayer->SufferDamage(1);
+		enemyMissile->Collide();
+	}
 }
 
 void CCollision::Collide(float fTimeElapsed)
@@ -110,8 +126,8 @@ void CCollision::SetEnemyObjects(CGameObject** pEnemy, int nNum)
 
 void CCollision::SetEnemyMissiles(CGameObject* pEnemy)
 {
-	//for (int i = 0; i < MAX_NUM_MISSILE; ++i)
-	//{
-	//	m_pEnemyMissiles.push_back(pEnemy->GetMissile(i));
-	//}
+	for (int i = 0; i < MAX_NUM_MISSILE; ++i)
+	{
+		m_pEnemyMissiles.push_back(pEnemy->GetMissile(i));
+	}
 }

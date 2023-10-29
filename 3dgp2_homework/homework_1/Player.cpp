@@ -302,10 +302,22 @@ void CHelicopterPlayer::PrepareAnimate()
 
 void CHelicopterPlayer::Animate(float fTimeElapsed)
 {
-	if (!m_bAlive)
-	{
-		return;
-	}
+	//if (!m_bAlive)
+	//{
+	//	int i = 0;
+	//	for (auto& explosion : m_ppExplosionAnimation)
+	//	{
+	//		explosion->SetAlive(true);
+	//		XMFLOAT4X4 xmf4x4transform = Matrix4x4::Identity();
+	//		if(i == 0)	xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, XMMatrixTranslation(-3.0f, -4.0f, -4.0f));
+	//		else if(i == 1)	xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, XMMatrixTranslation(3.0f, 1.0f, -5.0f));
+	//		else if(i == 2)	xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, XMMatrixTranslation(-1.0f, 5.0f, 0.0f));
+	//		xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, m_xmf4x4Local);
+	//		explosion->SetLocalTransform(xmf4x4transform);
+	//		++i;
+	//	}
+	//	//return;
+	//}
 
 	if (m_fCoolTime > 0.0f)
 	{
@@ -348,6 +360,22 @@ void CHelicopterPlayer::Animate(float fTimeElapsed)
 		missile->Animate(fTimeElapsed);
 	}
 
+	if (!m_bAlive)
+	{
+		int i = 0;
+		for (auto& explosion : m_ppExplosionAnimation)
+		{
+			explosion->SetAlive(true);
+			XMFLOAT4X4 xmf4x4transform = Matrix4x4::Identity();
+			if (i == 0)	xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, XMMatrixTranslation(-3.0f, -3.0f, -4.0f));
+			else if (i == 1)	xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, XMMatrixTranslation(2.5f, 1.0f, -5.0f));
+			else if (i == 2)	xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, XMMatrixTranslation(-1.0f, 4.0f, 0.0f));
+			xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, m_xmf4x4Local);
+			explosion->SetLocalTransform(xmf4x4transform);
+			++i;
+		}
+		//return;
+	}
 }
 
 void CHelicopterPlayer::Collide(CGameObject* pCollidedObject, float fTimeElapsed)
@@ -420,10 +448,10 @@ void CHelicopterPlayer::Collide(CGameObject* pCollidedObject, float fTimeElapsed
 
 void CHelicopterPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	if (!m_bAlive)
-	{
-		return;
-	}
+	//if (!m_bAlive)
+	//{
+	//	return;
+	//}
 
 	CPlayer::Render(pd3dCommandList, pCamera);
 
@@ -469,6 +497,15 @@ void CHelicopterPlayer::Fire()
 
 		missile->SetLocalTransform(Matrix4x4::Multiply(matrix, m_xmf4x4Local));
 		break;
+	}
+}
+
+void CHelicopterPlayer::SufferDamage(int nDamage)
+{
+	m_nHealthPoint -= nDamage;
+	if (m_nHealthPoint <= 0)
+	{
+		m_bAlive = false;
 	}
 }
 

@@ -192,13 +192,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_pDescriptorHeap = new CDescriptorHeap();
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 1 + 1 + 4 + 1 + 6 + 1 + 1); //SuperCobra(17), Gunship(2), Mi24(1, player), Skybox(1),
-																					//Terrain(4), Water(1), billboard(6), Missile(1), Explosion_sprite(1) // Gunship(2)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 1 + 1 + 4 + 1 + 6 + 1 + 1 + 3); //SuperCobra(17), Gunship(2), Mi24(1, player), Skybox(1),
+																					//Terrain(4), Water(1), billboard(6), player/enemy Missile(1 + 1), Explosion_sprite(3) // Gunship(2)
 
-	CHelicopterPlayer* pAirplanePlayer = new CHelicopterPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
-	pAirplanePlayer->SetPosition(XMFLOAT3(2560.0f, 1000.0f, 2560.0f ));
+	CHelicopterPlayer* pHelicopterPlayer = new CHelicopterPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
+	pHelicopterPlayer->SetPosition(XMFLOAT3(2560.0f, 1000.0f, 2560.0f));
 	//pAirplanePlayer->Rotate(0.0f, 165.0f, 0.0f);
-	m_pPlayer = pAirplanePlayer;
+	m_pPlayer = pHelicopterPlayer;
 
 	BuildDefaultLightsAndMaterials();
 
@@ -216,7 +216,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	
 	CObjectsShader* pObjectsShader = new CObjectsShader();
 	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
-	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), nullptr);
+	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pPlayer);
 	
 	CBillBoardObjectsShader* pBillboardObjectsShader = new CBillBoardObjectsShader(L"Terrain/512x512_billboard_pos.raw", m_pTerrain->GetRawImageWidth(), m_pTerrain->GetRawImageLength(), m_pTerrain->GetScale());
 	pBillboardObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
@@ -225,7 +225,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CSpriteObjectsShader* pSpriteObjectsShader = new CSpriteObjectsShader();
 	pSpriteObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
-	pSpriteObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), nullptr);
+	pSpriteObjectsShader->BuildPlayerSpriteObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pPlayer);
+	//pSpriteObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pPlayer);
 
 	CTransparentOjectsShader* pTransparentObjectsShader = new CTransparentOjectsShader();
 	pTransparentObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
