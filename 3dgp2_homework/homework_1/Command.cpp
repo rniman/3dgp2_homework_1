@@ -75,7 +75,7 @@ void CFireCommand::execute(CGameObject& gameObject)
 		if (player->GetCoolTime() > 0.0f)
 			return;
 
-		player->SetCoolTime(2.0f);
+		player->SetCoolTime(1.0f);
 		player->Fire();
 
 		char buf[256];

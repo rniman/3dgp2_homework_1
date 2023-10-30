@@ -1254,19 +1254,19 @@ void CSpriteObjectsShader::BuildPlayerSpriteObjects(ID3D12Device* pd3dDevice, ID
 	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 7.0f, 7.0f, 0.0f);
 	CSpriteObject* pSpriteObject[3];
 
-	pSpriteObject[0] = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1);
+	pSpriteObject[0] = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1, 6, 6);
 	pSpriteObject[0]->SetMaterial(0, pMaterial[0]);
 	pSpriteObject[0]->SetMesh(0, pSpriteMesh);
 	pSpriteObject[0]->SetAlive(false);
 	pSpriteObject[0]->SetSpeed(0.05f);
 
-	pSpriteObject[1] = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1);
+	pSpriteObject[1] = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1, 4, 4);
 	pSpriteObject[1]->SetMaterial(0, pMaterial[1]);
 	pSpriteObject[1]->SetMesh(0, pSpriteMesh);
 	pSpriteObject[1]->SetAlive(false);
 	pSpriteObject[1]->SetSpeed(0.08f);
 
-	pSpriteObject[2] = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1);
+	pSpriteObject[2] = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1, 4, 4);
 	pSpriteObject[2]->SetMaterial(0, pMaterial[2]);
 	pSpriteObject[2]->SetMesh(0, pSpriteMesh);
 	pSpriteObject[2]->SetAlive(false);
@@ -1277,11 +1277,26 @@ void CSpriteObjectsShader::BuildPlayerSpriteObjects(ID3D12Device* pd3dDevice, ID
 	pPlayer->SetExplosion(pSpriteObject[1], 1);
 	pPlayer->SetExplosion(pSpriteObject[2], 2);
 
-	m_nObjects = 3;
+	m_nObjects = 13;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	m_ppObjects[0] = pSpriteObject[0];
 	m_ppObjects[1] = pSpriteObject[1];
 	m_ppObjects[2] = pSpriteObject[2];
+
+	CTexture* pExplosionSpriteTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
+	pExplosionSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pExplosionSpriteTexture, 0, 3);
+
+	int i = 0;
+	for (auto& missile : pPlayer->GetMissiles())
+	{
+		m_ppObjects[3 + i] = missile->BuildExplosion(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSpriteMesh, pExplosionSpriteTexture);
+		++i;
+	}
+}
+
+void CSpriteObjectsShader::BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
 }
 
 void CSpriteObjectsShader::ReleaseObjects()

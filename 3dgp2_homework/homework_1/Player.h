@@ -114,6 +114,7 @@ public:
 			return nullptr;
 		return m_arraypMissile[nIndex]; 
 	};
+	std::array<CMissile*, MAX_NUM_MISSILE> GetMissiles() { return m_arraypMissile; };
 
 	void SetExplosion(CGameObject* pExplosion, int nIndex) { m_ppExplosionAnimation[nIndex] = pExplosion; };
 private:

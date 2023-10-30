@@ -62,9 +62,11 @@ public:
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(int nIndex);
 	
 	// for sprite texture
-	void CTexture::AnimateRowColumn(float fTime);
+	//void AnimateRowColumn(float fTime);
 	UINT GetColumns() const { return m_nColumns; };
 	UINT GetRows() const { return m_nRows; };
+
+	void SetColumnAndRow(int nColumn, int nRow) { m_nColumn = nColumn; m_nRow = m_nRow; };
 
 private:
 	int								m_nReferences = 0;
@@ -442,13 +444,21 @@ private:
 class CSpriteObject : public CGameObject
 {
 public:
-	CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMesh, int nMaterial);
+	CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMesh, int nMaterial, int nColumns, int nRows);
 	~CSpriteObject();
 
 	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override;
 
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; };
+	void SetTime(float fTime) { m_fTime = fTime; };
+	CMaterial* GetMaterial(int nIndex)const { return m_ppMaterials[nIndex]; };
 private:
 	float m_fSpeed = 0.1f;
 	float m_fTime = 0.0f;
+
+	UINT m_nColumns = 1;
+	UINT m_nRows = 1;
+	UINT m_nColumn = 0;
+	UINT m_nRow = 0;
 };

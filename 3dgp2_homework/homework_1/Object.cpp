@@ -263,22 +263,22 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 	return(d3dShaderResourceViewDesc);
 }
 
-void CTexture::AnimateRowColumn(float fTime)
-{
-	if (fTime == 0.0f)
-	{
-		if (++m_nColumn == m_nColumns)
-		{
-			m_nRow++;
-			m_nColumn = 0;
-		}
-
-		if (m_nRow == m_nRows)
-		{
-			m_nRow = 0;
-		}
-	}
-}
+//void CTexture::AnimateRowColumn(float fTime)
+//{
+//	if (fTime == 0.0f)
+//	{
+//		if (++m_nColumn == m_nColumns)
+//		{
+//			m_nRow++;
+//			m_nColumn = 0;
+//		}
+//
+//		if (m_nRow == m_nRows)
+//		{
+//			m_nRow = 0;
+//		}
+//	}
+//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1066,8 +1066,8 @@ void CGunshipObject::Animate(float fTimeElapsed)
 	else
 	{
 		// fire
-		SetCoolTime(m_fFireCoolTime);
-		Fire();
+		//SetCoolTime(m_fFireCoolTime);
+		//Fire();
 	}
 
 	Find(fTimeElapsed);
@@ -1434,9 +1434,11 @@ void COceanObjcet::SetPlayer(CPlayer* pPlayer)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CSpriteObject::CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes, int nMaterials)
+CSpriteObject::CSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes, int nMaterials, int nColumns, int nRows)
 	: CGameObject(nMeshes, nMaterials)
 {
+	m_nColumns = nColumns;
+	m_nRows = nRows;
 }
 
 CSpriteObject::~CSpriteObject()
@@ -1449,13 +1451,71 @@ void CSpriteObject::Animate(float fTimeElapsed)
 	{
 		if (m_ppMaterials[i])
 		{
-			m_fTime += fTimeElapsed * 0.5f;
+			m_fTime += fTimeElapsed;
 			if (m_fTime >= m_fSpeed)
 			{
 				m_fTime = 0.0f;
 			}
-			m_ppMaterials[i]->m_pTexture->AnimateRowColumn(m_fTime);
+			
+			if (m_fTime == 0.0f)
+			{
+				if (++m_nColumn == m_nColumns)
+				{
+					m_nRow++;
+					m_nColumn = 0;
+				}
+
+				if (m_nRow == m_nRows)
+				{
+					m_nRow = 0;
+				}
+			}
 		}
 	}
+}
+
+void CSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	// 하는거 없는 상태
+	OnPrepareRender();
+
+	UpdateShaderVariable(pd3dCommandList);
+
+	if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+	{
+		pd3dCommandList->SetGraphicsRoot32BitConstants(2, 4, &m_ppMaterials[0]->m_xmf4AmbientColor, 16);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(2, 4, &m_ppMaterials[0]->m_xmf4AlbedoColor, 20);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(2, 4, &m_ppMaterials[0]->m_xmf4SpecularColor, 24);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(2, 4, &m_ppMaterials[0]->m_xmf4EmissiveColor, 28);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_ppMaterials[0]->m_nType, 32);
+
+		// 행과 열을 오브젝트에서 관리하기위해
+		pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_nColumns, 33);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_nRows, 34);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_nColumn, 35);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(2, 1, &m_nRow, 36);
+
+		if (m_ppMaterials[0]->m_pTexture->GetRootParameters() == m_ppMaterials[0]->m_pTexture->GetTextures())
+		{
+			for (int i = 0; i < m_ppMaterials[0]->m_pTexture->GetRootParameters(); i++)
+			{
+				if (m_ppMaterials[0]->m_pTexture->GetGpuDescriptorHandle(i).ptr && (m_ppMaterials[0]->m_pTexture->GetRootParameter(i) != -1))
+				{
+					pd3dCommandList->SetGraphicsRootDescriptorTable(m_ppMaterials[0]->m_pTexture->GetRootParameter(i), m_ppMaterials[0]->m_pTexture->GetGpuDescriptorHandle(i));
+				}
+			}
+		}
+	}
+
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0);
+		}
+	}
+
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 

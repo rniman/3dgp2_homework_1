@@ -248,6 +248,7 @@ public:
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
 	void BuildPlayerSpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
+	void BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
 	virtual void ReleaseObjects();
 
 	virtual void AnimateObjects(float fTimeElapsed);
@@ -257,4 +258,7 @@ public:
 private:
 	CGameObject** m_ppObjects = nullptr;
 	int m_nObjects = 0;
+
+	CGameObject** m_ppEnemyObjects = nullptr;
+	int m_nEnemyObjects = 0;
 };
