@@ -1054,10 +1054,10 @@ void CGunshipObject::PrepareAnimate()
 
 void CGunshipObject::Animate(float fTimeElapsed)
 {
-	if (!m_bAlive)
-	{
-		return;
-	}
+	//if (!m_bAlive)
+	//{
+	//	return;
+	//}
 
 	if (m_fCoolTime > 0.0f)
 	{
@@ -1093,6 +1093,16 @@ void CGunshipObject::Animate(float fTimeElapsed)
 			continue;
 
 		missile->Animate(fTimeElapsed);
+	}
+
+	if (!m_bAlive)
+	{
+		m_pExplosionAnimation->SetAlive(true);
+		XMFLOAT4X4 xmf4x4transform = Matrix4x4::Identity();
+		xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, XMMatrixTranslation(-0.0f, 5.0f, -0.0f));
+		xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, m_xmf4x4Local);
+		m_pExplosionAnimation->SetLocalTransform(xmf4x4transform);
+		//return;
 	}
 }
 
@@ -1169,6 +1179,9 @@ void CGunshipObject::SufferDamage(int nDamage)
 
 void CGunshipObject::Find(float fTimeElapsed)
 {
+	if (!m_bAlive)
+		return;
+
 	// Å¸°Ù±îÁöÀÇ ¹æÇâº¤ÅÍ
 	XMFLOAT3 xmf3Target = Vector3::Add(m_pTarget->GetPosition(), GetPosition(), -1);
 	

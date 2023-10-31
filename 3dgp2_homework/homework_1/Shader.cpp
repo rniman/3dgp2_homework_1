@@ -1296,11 +1296,23 @@ void CSpriteObjectsShader::BuildPlayerSpriteObjects(ID3D12Device* pd3dDevice, ID
 
 void CSpriteObjectsShader::BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nObjects)
 {
-	m_nEnemyObjects = nObjects;
+	m_nEnemyObjects = nObjects * 11;
 	m_ppEnemyObjects = new CGameObject* [m_nEnemyObjects];
-	CGameObject** ppEnemy = (CGameObject**)pContext;
 
-	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 7.0f, 7.0f, 0.0f);
+	CTexture* pSpriteTexture;
+
+	pSpriteTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
+	pSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pSpriteTexture, 0, 3);
+
+	CMaterial* pMaterial;
+	pMaterial = new CMaterial();
+	pMaterial->SetTexture(pSpriteTexture);
+
+	CTexturedRectMesh* pSpriteMesh1 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f);
+	CTexturedRectMesh* pSpriteMesh2 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 7.0f, 7.0f, 0.0f);
+
+	CGameObject** ppEnemy = (CGameObject**)pContext;
 
 	CTexture* pExplosionSpriteTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
 	pExplosionSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
@@ -1313,9 +1325,19 @@ void CSpriteObjectsShader::BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3
 			continue;
 		}
 
+		CSpriteObject* pSpriteObject;
+		pSpriteObject = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1, 6, 6);
+		pSpriteObject->SetMaterial(0, pMaterial);
+		pSpriteObject->SetMesh(0, pSpriteMesh1);
+		pSpriteObject->SetAlive(false);
+		pSpriteObject->SetSpeed(0.05f);
+		dynamic_cast<CGunshipObject*>(ppEnemy[i])->SetExplosion(pSpriteObject);
+
+		m_ppEnemyObjects[11 * i] = pSpriteObject;
+
 		for (int j = 0; j < MAX_NUM_MISSILE; ++j)
 		{
-			m_ppEnemyObjects[i] = ppEnemy[i]->GetMissile(j)->BuildExplosion(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSpriteMesh, pExplosionSpriteTexture);
+			m_ppEnemyObjects[11 * i + j + 1] = ppEnemy[i]->GetMissile(j)->BuildExplosion(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSpriteMesh2, pExplosionSpriteTexture);
 		}
 	}
 

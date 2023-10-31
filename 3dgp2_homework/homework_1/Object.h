@@ -348,10 +348,14 @@ public:
 	void SetCoolTime(float fCoolTime) { m_fCoolTime = fCoolTime; };
 
 	virtual class CMissile* GetMissile(int nIndex) { return m_arraypMissile[nIndex]; };
+	std::array<CMissile*, MAX_NUM_MISSILE> GetMissiles() { return m_arraypMissile; };
+
+	void SetExplosion(CGameObject* pExplosion) { m_pExplosionAnimation = pExplosion; };
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
 	CGameObject* m_pMainBodyFrame = nullptr;
+	CGameObject* m_pExplosionAnimation;
 
 	XMFLOAT3	mxmf3Position;
 

@@ -19,6 +19,8 @@ public:
 	void SetLifeTime(float fLifeTime = 5.0f) { m_fLifeTime = fLifeTime; };
 	virtual void SetOOBB() override;
 
+	float GetExplosionTime() const { return m_fExplosionTime; };
+
 private:
 	CSpriteObject* m_pExplisionAnimation;
 

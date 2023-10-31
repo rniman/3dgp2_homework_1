@@ -41,6 +41,11 @@ void CCollision::CheckPlayerBulletCollisions(float fTimeElapsed)
 				continue;
 			}
 
+			if (dynamic_cast<CMissile*>(m_pPlayerMissiles[i])->GetExplosionTime() > 0.0f)
+			{
+				continue;
+			}
+
 			if (!enemy->GetOOBB().Intersects(m_pPlayerMissiles[i]->GetOOBB()))
 			{
 				continue;
@@ -61,6 +66,11 @@ void CCollision::CheckEnemyBulletCollisions(float fTimeElapsed)
 	for (auto& enemyMissile : m_pEnemyMissiles)
 	{
 		if(!enemyMissile->GetAlive())
+		{
+			continue;
+		}
+
+		if (dynamic_cast<CMissile*>(enemyMissile)->GetExplosionTime() > 0.0f)
 		{
 			continue;
 		}

@@ -192,9 +192,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_pDescriptorHeap = new CDescriptorHeap();
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 1 + 1 + 4 + 1 + 6 + 1 + 1 + 3 + 1 + 1); //SuperCobra(17), Gunship(2), Mi24(1, player), Skybox(1),
-																							//Terrain(4), Water(1), billboard(6), player/enemy Missile(1 + 1), 
-																							//Player Explosion sprite(3), missile explosion( 1 + 1 ) // + 2?
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 1 + 1 + 4 + 1 + 6 + 1 + 1 + 3 + 1 + 1 + 1); //SuperCobra(17), Gunship(2), Mi24(1, player), Skybox(1),
+																									//Terrain(4), Water(1), billboard(6), player/enemy Missile(1 + 1), 
+																									//Player Explosion sprite(3), missile explosion( 1 + 1 ), Enemy Explosion sprite // + 2?
 
 	CHelicopterPlayer* pHelicopterPlayer = new CHelicopterPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pHelicopterPlayer->SetPosition(XMFLOAT3(2560.0f, 1000.0f, 2560.0f));
