@@ -341,7 +341,7 @@ void CStandardShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 //
 CObjectsShader::CObjectsShader()
 {
-	m_nObjects = 10;
+	m_nObjects = 1;
 }
 
 CObjectsShader::~CObjectsShader()
@@ -469,7 +469,6 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 		if (m_ppObjects[j])
 		{
 			m_ppObjects[j]->Animate(fTimeElapsed);
-			//m_ppObjects[j]->UpdateTransform(nullptr);
 		}
 	}
 }
@@ -1170,7 +1169,7 @@ D3D12_RASTERIZER_DESC CSpriteObjectsShader::CreateRasterizerState()
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	//	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-	d3dRasterizerDesc.FrontCounterClockwise = TRUE;
+	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
 	d3dRasterizerDesc.DepthBias = 0;
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
 	d3dRasterizerDesc.SlopeScaledDepthBias = 0.0f;
@@ -1278,7 +1277,7 @@ void CSpriteObjectsShader::BuildPlayerSpriteObjects(ID3D12Device* pd3dDevice, ID
 	pPlayer->SetExplosion(pSpriteObject[2], 2);
 
 	m_nObjects = 13;
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new CGameObject* [m_nObjects];
 	m_ppObjects[0] = pSpriteObject[0];
 	m_ppObjects[1] = pSpriteObject[1];
 	m_ppObjects[2] = pSpriteObject[2];
@@ -1295,8 +1294,31 @@ void CSpriteObjectsShader::BuildPlayerSpriteObjects(ID3D12Device* pd3dDevice, ID
 	}
 }
 
-void CSpriteObjectsShader::BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+void CSpriteObjectsShader::BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nObjects)
 {
+	m_nEnemyObjects = nObjects;
+	m_ppEnemyObjects = new CGameObject* [m_nEnemyObjects];
+	CGameObject** ppEnemy = (CGameObject**)pContext;
+
+	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 7.0f, 7.0f, 0.0f);
+
+	CTexture* pExplosionSpriteTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
+	pExplosionSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pExplosionSpriteTexture, 0, 3);
+
+	for (int i = 0; i < nObjects; ++i)
+	{
+		if (dynamic_cast<CGunshipObject*>(ppEnemy[i]) == nullptr)
+		{
+			continue;
+		}
+
+		for (int j = 0; j < MAX_NUM_MISSILE; ++j)
+		{
+			m_ppEnemyObjects[i] = ppEnemy[i]->GetMissile(j)->BuildExplosion(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSpriteMesh, pExplosionSpriteTexture);
+		}
+	}
+
 }
 
 void CSpriteObjectsShader::ReleaseObjects()
@@ -1306,18 +1328,35 @@ void CSpriteObjectsShader::ReleaseObjects()
 		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Release();
 		delete[] m_ppObjects;
 	}
+
+	if (m_ppEnemyObjects)
+	{
+		for (int j = 0; j < m_nEnemyObjects; j++) if (m_ppEnemyObjects[j]) m_ppEnemyObjects[j]->Release();
+		delete[] m_ppEnemyObjects;
+	}
 }
 
 void CSpriteObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	for (int j = 0; j < m_nObjects; j++)
+	for (int i = 0; i < m_nObjects; i++)
 	{
-		if (m_ppObjects[j])
+		if (m_ppObjects[i])
 		{
-			if (!m_ppObjects[j]->GetAlive())
+			if (!m_ppObjects[i]->GetAlive())
 				continue;
 
-			m_ppObjects[j]->Animate(fTimeElapsed);
+			m_ppObjects[i]->Animate(fTimeElapsed);
+		}
+	}
+
+	for (int i = 0; i < m_nEnemyObjects; i++)
+	{
+		if (m_ppEnemyObjects[i])
+		{
+			if (!m_ppEnemyObjects[i]->GetAlive())
+				continue;
+
+			m_ppEnemyObjects[i]->Animate(fTimeElapsed);
 		}
 	}
 }
@@ -1326,15 +1365,27 @@ void CSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CC
 {
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
-	for (int j = 0; j < m_nObjects; j++)
+	for (int i = 0; i < m_nObjects; i++)
 	{
-		if (m_ppObjects[j])
+		if (m_ppObjects[i])
 		{
-			if (!m_ppObjects[j]->GetAlive())
+			if (!m_ppObjects[i]->GetAlive())
 				continue;
 
-			m_ppObjects[j]->UpdateTransform();
-			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+			m_ppObjects[i]->UpdateTransform();
+			m_ppObjects[i]->Render(pd3dCommandList, pCamera);
+		}
+	}
+
+	for (int i = 0; i < m_nEnemyObjects; i++)
+	{
+		if (m_ppEnemyObjects[i])
+		{
+			if (!m_ppEnemyObjects[i]->GetAlive())
+				continue;
+
+			m_ppEnemyObjects[i]->UpdateTransform();
+			m_ppEnemyObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
 }

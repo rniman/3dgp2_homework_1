@@ -1066,8 +1066,8 @@ void CGunshipObject::Animate(float fTimeElapsed)
 	else
 	{
 		// fire
-		//SetCoolTime(m_fFireCoolTime);
-		//Fire();
+		SetCoolTime(m_fFireCoolTime);
+		Fire();
 	}
 
 	Find(fTimeElapsed);
