@@ -230,6 +230,75 @@ void CTexturedRectMesh::RenderInstance(ID3D12GraphicsCommandList* pd3dCommandLis
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+CUserInterfaceRectMesh::CUserInterfaceRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth, float fMaxU, float fMaxV, float fMinU, float fMinV)
+	:CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 6;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	m_pxmf3Positions = new XMFLOAT3[m_nVertices];
+	m_pxmf2TextureCoords0 = new XMFLOAT2[m_nVertices];
+
+	float fx = (fWidth * 0.5f), fy = (fHeight * 0.5f), fz = (fDepth * 0.5f);
+
+	m_pxmf3Positions[0] = XMFLOAT3(+fx, +fy, fz); m_pxmf2TextureCoords0[0] = XMFLOAT2(fMaxU, fMinV);
+	m_pxmf3Positions[1] = XMFLOAT3(+fx, -fy, fz); m_pxmf2TextureCoords0[1] = XMFLOAT2(fMaxU, fMaxV);
+	m_pxmf3Positions[2] = XMFLOAT3(-fx, -fy, fz); m_pxmf2TextureCoords0[2] = XMFLOAT2(fMinU, fMaxV);
+	m_pxmf3Positions[3] = XMFLOAT3(-fx, -fy, fz); m_pxmf2TextureCoords0[3] = XMFLOAT2(fMinU, fMaxV);
+	m_pxmf3Positions[4] = XMFLOAT3(-fx, +fy, fz); m_pxmf2TextureCoords0[4] = XMFLOAT2(fMinU, fMinV);
+	m_pxmf3Positions[5] = XMFLOAT3(+fx, +fy, fz); m_pxmf2TextureCoords0[5] = XMFLOAT2(fMaxU, fMinV);
+		
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	m_d3dVertexBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+	m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords0, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr);
+
+	m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
+	m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
+	m_d3dTextureCoord0BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+}
+
+CUserInterfaceRectMesh::~CUserInterfaceRectMesh()
+{
+	if (m_pxmf2TextureCoords0) delete[] m_pxmf2TextureCoords0;
+}
+
+void CUserInterfaceRectMesh::ReleaseUploadBuffers()
+{
+	CMesh::ReleaseUploadBuffers();
+}
+
+void CUserInterfaceRectMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
+{
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dVertexBufferView, m_d3dTextureCoord0BufferView };
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
+
+	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+}
+
+void CUserInterfaceRectMesh::SetUV(float fMinU, float fMinV)
+{
+	m_pxmf2TextureCoords0[0] = XMFLOAT2(fMinU + 50.0f/500.0f, fMinV);
+	m_pxmf2TextureCoords0[1] = XMFLOAT2(fMinU + 50.0f / 500.0f, fMinV + 1.0f);
+	m_pxmf2TextureCoords0[2] = XMFLOAT2(fMinU, fMinV + 1.0f);
+	m_pxmf2TextureCoords0[3] = XMFLOAT2(fMinU, fMinV + 1.0f);
+	m_pxmf2TextureCoords0[4] = XMFLOAT2(fMinU, fMinV);
+	m_pxmf2TextureCoords0[5] = XMFLOAT2(fMinU + 50.0f / 500.0f, fMinV);
+
+	D3D12_RANGE d3dReadRange = { 0, 0 };
+	UINT8* pBufferDataBegin = nullptr;
+	m_pd3dTextureCoord0Buffer->Map(0, &d3dReadRange, (void**)&pBufferDataBegin);
+	memcpy(pBufferDataBegin, m_pxmf2TextureCoords0, sizeof(XMFLOAT2) * m_nVertices);
+	m_pd3dTextureCoord0Buffer->Unmap(0, nullptr);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 
 CMissileMesh::CMissileMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)
 	: CMesh(pd3dDevice, pd3dCommandList)
@@ -903,4 +972,3 @@ void CHeightMapGridMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int 
 		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
 }
-

@@ -109,7 +109,6 @@ public:
 	
 	~CDiffused2TexturedVertex() { }
 };
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
@@ -215,6 +214,30 @@ protected:
 
 	ComPtr<ID3D12Resource>			m_pd3dTextureCoord0Buffer;
 	ComPtr<ID3D12Resource>			m_pd3dTextureCoord0UploadBuffer;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dTextureCoord0BufferView;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+class CUserInterfaceRectMesh : public CMesh
+{
+public:
+	CUserInterfaceRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f,
+						   float fMaxU = 1.0f, float fMaxV = 1.0f, float fMinU = 0.0f, float fMinV = 0.0f);
+	virtual ~CUserInterfaceRectMesh();
+
+	virtual void ReleaseUploadBuffers();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+
+	// 숫자 하나 너비,높이 50픽셀
+	// 총 텍스쳐 너비 500픽셀
+	void SetUV(float fMinU, float fMinV = 0.0f);
+
+protected:
+	XMFLOAT2* m_pxmf2TextureCoords0 = nullptr;
+
+	ComPtr<ID3D12Resource>			m_pd3dTextureCoord0Buffer;
+	//ComPtr<ID3D12Resource>			m_pd3dTextureCoord0UploadBuffer;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dTextureCoord0BufferView;
 };
 

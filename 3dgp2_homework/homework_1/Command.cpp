@@ -101,6 +101,7 @@ bool CBaseInputHandler::IsPressed(ButtonType buttonType)
 
 void CPlayerInputHandler::HandleInput(CGameObject& gameObject)
 {
+	if (!gameObject.GetAlive()) return;
 	if (IsPressed(ButtonType::BUTTON_MOVE_FORWARD)) button_forward->execute(gameObject);
 	if (IsPressed(ButtonType::BUTTON_MOVE_BACKWARD)) button_backward->execute(gameObject);
 	if (IsPressed(ButtonType::BUTTON_MOVE_RIGHT)) button_right->execute(gameObject);

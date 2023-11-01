@@ -179,5 +179,8 @@
     <FxCompile Include="PSBillboard.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="VSUserInterface.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -373,6 +373,7 @@ private:
 	float m_fFireCoolTime = 0.0f;
 	float m_fCoolTime = 0.0f;
 	float m_fRotateSpeed = 180.0f;
+	float m_fRange = 0.0f;
 };
 
 class CMi24Object : public CGameObject
@@ -457,6 +458,9 @@ public:
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; };
 	void SetTime(float fTime) { m_fTime = fTime; };
 	CMaterial* GetMaterial(int nIndex)const { return m_ppMaterials[nIndex]; };
+
+	void SetRow(UINT nRow) { m_nRow = nRow; };
+	void SetColumn(UINT nColumn) { m_nColumn = nColumn; };
 private:
 	float m_fSpeed = 0.1f;
 	float m_fTime = 0.0f;

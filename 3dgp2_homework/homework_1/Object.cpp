@@ -1007,6 +1007,7 @@ CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_fFriction = 300.0f;
 	m_fFireCoolTime = float(uid(dre));
+	m_fRange = 50.0f * float(uid(dre));
 }
 
 CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pMissileObjectModel, void* pTarget)
@@ -1211,7 +1212,7 @@ void CGunshipObject::Find(float fTimeElapsed)
 	}
 
 	// ÀÌµ¿
-	if (xmf3Target.x * xmf3Target.x + xmf3Target.z * xmf3Target.z > 10000.0f)
+	if (xmf3Target.x * xmf3Target.x + xmf3Target.z * xmf3Target.z > m_fRange * m_fRange)
 	{
 		XMFLOAT3 xmf3Shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), xmf3TargetXZ, 10.0f);
 		Move(xmf3Shift, true);

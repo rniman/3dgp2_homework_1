@@ -262,3 +262,38 @@ private:
 	CGameObject** m_ppEnemyObjects = nullptr;
 	int m_nEnemyObjects = 0;
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CUserInterfaceShader : public CShader
+{
+public:
+	CUserInterfaceShader();
+	~CUserInterfaceShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
+	virtual D3D12_BLEND_DESC CreateBlendState();
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);;
+
+	virtual void ReleaseObjects();
+
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+private:
+	CGameObject* m_pScore;
+	CGameObject* m_pHp;
+	CGameObject* m_pPlayer;
+	
+	CGameObject* m_pNumberScore[5];
+	float		 m_fScoreU[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	int			 m_nScore = 0;
+
+	CGameObject* m_pNumberHp[2];
+	float		 m_fHpU[2] = { 0.0f, 0.0f };
+	int			 m_nHp = 0;
+};

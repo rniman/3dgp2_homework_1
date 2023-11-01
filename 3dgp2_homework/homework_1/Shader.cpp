@@ -6,7 +6,8 @@
 #include "Shader.h"
 #include "Scene.h"
 
-default_random_engine dre;
+std::random_device rd;
+default_random_engine dre(rd());
 
 CShader::CShader()
 {
@@ -796,9 +797,9 @@ D3D12_INPUT_LAYOUT_DESC CBillBoardObjectsShader::CreateInputLayout()
 	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	pd3dInputElementDescs[2] = { "WORLDMATRIX", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[3] = { "WORLDMATRIX", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 16,D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[4] = { "WORLDMATRIX", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 32,D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[5] = { "WORLDMATRIX", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 48,D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[3] = { "WORLDMATRIX", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 16, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[4] = { "WORLDMATRIX", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 32, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[5] = { "WORLDMATRIX", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 48, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
@@ -923,44 +924,44 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	CTexturedRectMesh* grassMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 0.0f);
 	CTexturedRectMesh* treeMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 120.0f, 120.0f, 0.0f);
 
-	CTexture* pTestTexture[6];
-	pTestTexture[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Grass01.dds", RESOURCE_TEXTURE2D, 0);
-	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[0], 0, 3);
+	CTexture* pTextures[6];
+	pTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Grass01.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTextures[0], 0, 3);
 
-	pTestTexture[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Grass02.dds", RESOURCE_TEXTURE2D, 0);
-	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[1], 0, 3);
+	pTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Grass02.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTextures[1], 0, 3);
 
-	pTestTexture[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/pngegg.dds", RESOURCE_TEXTURE2D, 0);
-	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[2], 0, 3);
+	pTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/pngegg.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTextures[2], 0, 3);
 
-	pTestTexture[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[3]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryGrass.dds", RESOURCE_TEXTURE2D, 0);
-	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[3], 0, 3);
+	pTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextures[3]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryGrass.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTextures[3], 0, 3);
 
-	pTestTexture[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[4]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryTree.dds", RESOURCE_TEXTURE2D, 0);
-	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[4], 0, 3);
+	pTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextures[4]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryTree.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTextures[4], 0, 3);
 
-	pTestTexture[5] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTestTexture[5]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryTree2.dds", RESOURCE_TEXTURE2D, 0);
-	CScene::CreateShaderResourceViews(pd3dDevice, pTestTexture[5], 0, 3);
+	pTextures[5] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextures[5]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/dryTree2.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTextures[5], 0, 3);
 
-	CMaterial* pTestMaterial[6];
-	pTestMaterial[0] = new CMaterial();
-	pTestMaterial[0]->SetTexture(pTestTexture[0]);
-	pTestMaterial[1] = new CMaterial();
-	pTestMaterial[1]->SetTexture(pTestTexture[1]);
-	pTestMaterial[2] = new CMaterial();
-	pTestMaterial[2]->SetTexture(pTestTexture[2]);
-	pTestMaterial[3] = new CMaterial();
-	pTestMaterial[3]->SetTexture(pTestTexture[3]);
-	pTestMaterial[4] = new CMaterial();
-	pTestMaterial[4]->SetTexture(pTestTexture[4]);
-	pTestMaterial[5] = new CMaterial();
-	pTestMaterial[5]->SetTexture(pTestTexture[5]);
+	CMaterial* pMaterials[6];
+	pMaterials[0] = new CMaterial();
+	pMaterials[0]->SetTexture(pTextures[0]);
+	pMaterials[1] = new CMaterial();
+	pMaterials[1]->SetTexture(pTextures[1]);
+	pMaterials[2] = new CMaterial();
+	pMaterials[2]->SetTexture(pTextures[2]);
+	pMaterials[3] = new CMaterial();
+	pMaterials[3]->SetTexture(pTextures[3]);
+	pMaterials[4] = new CMaterial();
+	pMaterials[4]->SetTexture(pTextures[4]);
+	pMaterials[5] = new CMaterial();
+	pMaterials[5]->SetTexture(pTextures[5]);
 
 
 	int i = 0;
@@ -1068,7 +1069,7 @@ void CBillBoardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 
 				m_ppObjects[nMaterialType].emplace_back(1,1);
 				m_ppObjects[nMaterialType].rbegin()->SetMesh(0, pMesh);
-				m_ppObjects[nMaterialType].rbegin()->SetMaterial(0, pTestMaterial[nMaterialType]);
+				m_ppObjects[nMaterialType].rbegin()->SetMaterial(0, pMaterials[nMaterialType]);
 				m_ppObjects[nMaterialType].rbegin()->SetPosition(xPosition, fHeight + fyOffset, zPosition);
 			}
 		}
@@ -1414,4 +1415,242 @@ void CSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CC
 
 void CSpriteObjectsShader::ReleaseUploadBuffers()
 {
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		if (m_ppObjects[i])
+		{
+			m_ppObjects[i]->ReleaseUploadBuffers();
+		}
+	}
+
+	for (int i = 0; i < m_nEnemyObjects; ++i)
+	{
+		if (m_ppEnemyObjects[i])
+		{
+			m_ppEnemyObjects[i]->ReleaseUploadBuffers();
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CUserInterfaceShader::CUserInterfaceShader()
+{
+}
+
+CUserInterfaceShader::~CUserInterfaceShader()
+{
+}
+
+D3D12_INPUT_LAYOUT_DESC CUserInterfaceShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 2;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
+}
+
+D3D12_SHADER_BYTECODE CUserInterfaceShader::CreateVertexShader()
+{
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/VSUserInterface.cso", &m_pd3dVertexShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CUserInterfaceShader::CreatePixelShader()
+{
+	return CShader::ReadCompiledShaderFromFile(L"./../Debug/PSTextured.cso", &m_pd3dPixelShaderBlob);
+}
+
+D3D12_RASTERIZER_DESC CUserInterfaceShader::CreateRasterizerState()
+{
+	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
+	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
+	d3dRasterizerDesc.DepthBias = 0;
+	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 0.0f;
+	d3dRasterizerDesc.DepthClipEnable = TRUE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
+	d3dRasterizerDesc.ForcedSampleCount = 0;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return(d3dRasterizerDesc);
+}
+
+D3D12_BLEND_DESC CUserInterfaceShader::CreateBlendState()
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = TRUE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+
+void CUserInterfaceShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates.reserve(m_nPipelineStates);
+
+	for (int i = 0; i < m_nPipelineStates; ++i)
+	{
+		m_ppd3dPipelineStates.emplace_back(ComPtr<ID3D12PipelineState>());
+	}
+
+	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
+	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
+
+	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+void CUserInterfaceShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CGameObject* pHpObject = new CGameObject(1, 1);
+	CTexturedRectMesh* hpMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.2f, 0.2f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f ,0.0f, 1.0f);
+
+	CTexture* pHpTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 1, 1);
+	pHpTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Text/hpTexture.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pHpTexture, 0, 3);
+
+	CMaterial* pHpMaterial = new CMaterial();
+	pHpMaterial->SetTexture(pHpTexture);
+	pHpObject->SetMaterial(0, pHpMaterial);
+	pHpObject->SetMesh(0, hpMesh);
+	pHpObject->SetPosition(-0.9f, -0.95f, 0.0f);
+	
+	m_pHp = pHpObject;
+
+	CGameObject* pScoreObject = new CGameObject(1, 1);
+	CTexturedRectMesh* scoreMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.4f, 0.2f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+
+	CTexture* pScoreTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 1, 1);
+	pScoreTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Text/ScoreTexture.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pScoreTexture, 0, 3);
+
+	CMaterial* pScoreMaterial = new CMaterial();
+	pScoreMaterial->SetTexture(pScoreTexture);
+	pScoreObject->SetMaterial(0, pScoreMaterial);
+	pScoreObject->SetMesh(0, scoreMesh);
+	pScoreObject->SetPosition(-0.8f, 0.9f, 0.0f);
+
+	m_pScore = pScoreObject;
+
+	CGameObject** pNumberScoreObject = new CGameObject*[5];
+	CUserInterfaceRectMesh* numberScoreMesh[5];
+
+	CTexture* pNumberScoreTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 1, 1);
+	pNumberScoreTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Text/NumberTexture.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pNumberScoreTexture, 0, 3);
+
+	CMaterial* pNumberScoreMaterial = new CMaterial();
+	pNumberScoreMaterial->SetTexture(pNumberScoreTexture);
+	for(int i=0 ;i<5;++i)
+	{
+		pNumberScoreObject[i] = new CGameObject(1, 1);
+		pNumberScoreObject[i]->SetMaterial(0, pNumberScoreMaterial);
+		numberScoreMesh[i] = new CUserInterfaceRectMesh(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f);
+		numberScoreMesh[i]->SetUV(m_fScoreU[i]);
+		pNumberScoreObject[i]->SetMesh(0, numberScoreMesh[i]);
+		pNumberScoreObject[i]->SetPosition(-0.57f + i * 0.1f, 0.91f, 0.0f);
+		m_pNumberScore[i] = pNumberScoreObject[i];
+	}
+
+	CGameObject** pNumberHpObject = new CGameObject* [2];
+	CUserInterfaceRectMesh* numberHpMesh[2];
+	for (int i = 0; i < 2; ++i)
+	{
+		pNumberHpObject[i] = new CGameObject(1, 1);
+		pNumberHpObject[i]->SetMaterial(0, pNumberScoreMaterial);
+		numberHpMesh[i] = new CUserInterfaceRectMesh(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f);
+		numberHpMesh[i]->SetUV(m_fHpU[i]);
+		pNumberHpObject[i]->SetMesh(0, numberHpMesh[i]);
+		pNumberHpObject[i]->SetPosition(-0.77f + i * 0.1f, -0.94f, 0.0f);
+		m_pNumberHp[i] = pNumberHpObject[i];
+	}
+
+	m_pPlayer = (CHelicopterPlayer*)pContext;
+}
+
+void CUserInterfaceShader::ReleaseObjects()
+{
+}
+
+void CUserInterfaceShader::AnimateObjects(float fTimeElapsed)
+{
+	m_nHp = dynamic_cast<CHelicopterPlayer*>(m_pPlayer)->GetHp();
+	for (int i = 1, j = 1; i <= 10; i = i * 10, --j)
+	{
+		m_fHpU[j] = 50.0f * (m_nHp % (i * 10) / i);
+		if (m_fHpU[j] >= 500.0f)
+			m_fHpU[j] = 0.0f;
+	}
+
+	if (m_nHp < 0)
+		return;
+
+	m_nScore = dynamic_cast<CHelicopterPlayer*>(m_pPlayer)->GetScore();
+	if (m_nScore == 0)
+	{
+		return;
+	}
+
+	if (m_nScore > 99'999)
+	{
+		//clear
+	}
+
+	for (int i = 1, j = 4; i <= 10'000; i = i * 10, --j)
+	{
+		m_fScoreU[j] = 50.0f * (m_nScore % (i * 10) / i);
+		if (m_fScoreU[j] >= 500.0f)
+			m_fScoreU[j] = 0.0f;
+	}
+
+
+}
+
+void CUserInterfaceShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
+
+	m_pHp->UpdateTransform();
+	m_pHp->Render(pd3dCommandList, pCamera);
+
+	m_pScore->UpdateTransform();
+	m_pScore->Render(pd3dCommandList, pCamera);
+
+	for (int i = 0; i < 5; ++i)
+	{
+		m_pNumberScore[i]->UpdateTransform();
+		dynamic_cast<CUserInterfaceRectMesh*>(m_pNumberScore[i]->GetMesh(0))->SetUV(m_fScoreU[i] / 500.0f);
+		m_pNumberScore[i]->Render(pd3dCommandList, pCamera);
+	}
+
+	for (int i = 0; i < 2; ++i)
+	{
+		m_pNumberHp[i]->UpdateTransform();
+		dynamic_cast<CUserInterfaceRectMesh*>(m_pNumberHp[i]->GetMesh(0))->SetUV(m_fHpU[i] / 500.0f);
+		m_pNumberHp[i]->Render(pd3dCommandList, pCamera);
+	}
 }

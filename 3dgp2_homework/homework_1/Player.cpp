@@ -302,6 +302,16 @@ void CHelicopterPlayer::PrepareAnimate()
 
 void CHelicopterPlayer::Animate(float fTimeElapsed)
 {
+	if (m_bAlive)
+	{
+		m_fAliveTime += fTimeElapsed;
+		if (m_fAliveTime > 0.001f)
+		{
+			m_nScore += 1;
+			m_fAliveTime = 0.0f;
+		}
+	}
+
 	//if (!m_bAlive)
 	//{
 	//	int i = 0;
@@ -431,8 +441,9 @@ void CHelicopterPlayer::Collide(CGameObject* pCollidedObject, float fTimeElapsed
 
 	if (dynamic_cast<CHeightMapTerrain*>(pCollidedObject))
 	{
-		OutputDebugMessage("Collide!");
+		m_nHealthPoint = 0;
 		m_bAlive = false;
+		m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	}
 
 	if (dynamic_cast<CMissile*>(pCollidedObject))

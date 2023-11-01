@@ -117,6 +117,9 @@ public:
 	std::array<CMissile*, MAX_NUM_MISSILE> GetMissiles() { return m_arraypMissile; };
 
 	void SetExplosion(CGameObject* pExplosion, int nIndex) { m_ppExplosionAnimation[nIndex] = pExplosion; };
+
+	int GetScore()const { return m_nScore; };
+	int GetHp()const { return m_nHealthPoint; };
 private:
 	CGameObject* m_pMainBodyFrame = nullptr;
 	CGameObject* m_pMainRotorFrame = nullptr;
@@ -126,7 +129,10 @@ private:
 
 	std::array<CMissile*, MAX_NUM_MISSILE> m_arraypMissile;
 
-	int   m_nHealthPoint = 10;
+	// 스코어 작성 필요
+	float m_fAliveTime = 0.0f;
+	int	  m_nScore = 0;
+	int   m_nHealthPoint = 50;
 	float m_fCoolTime = 0.0f;
 };
 
