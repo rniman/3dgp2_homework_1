@@ -15,7 +15,7 @@ float4 PSOcean(VS_OCEAN_OUTPUT input) : SV_TARGET
     float4 albedoColor = gtxAlbedo.Sample(gssWrap, input.uv);
 
     float4 cColor = albedoColor;
-    cColor.a = 0.9f;
+    cColor.a = 0.8f;
 
     return cColor;
 }

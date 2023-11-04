@@ -207,7 +207,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 
 	XMFLOAT3 xmf3Scale(10.0f, 6.0f, 10.0f);
-	//XMFLOAT3 xmf3Scale(2.5f, 6.0f, 2.5f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), _T("Terrain/terrain.raw"), 513, 513, 513, 513, xmf3Scale, xmf4Color);
 
@@ -226,7 +225,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CSpriteObjectsShader* pSpriteObjectsShader = new CSpriteObjectsShader();
 	pSpriteObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
 	pSpriteObjectsShader->BuildPlayerSpriteObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), m_pPlayer);
-	pSpriteObjectsShader->BuildEnemySpriteObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), pObjectsShader->GetObjects(), pObjectsShader->GetNumberOfObjects());
+	pSpriteObjectsShader->BuildEnemySpriteObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get(), pObjectsShader->GetObjects(), pObjectsShader->GetNumberOfGunshipObjects(), pObjectsShader->GetNumberOfSuperCobraObjects());
 
 	CTransparentOjectsShader* pTransparentObjectsShader = new CTransparentOjectsShader();
 	pTransparentObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature.Get());
@@ -245,8 +244,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pCollision = new CCollision;
 	m_pCollision->SetPlayer(m_pPlayer);
 	m_pCollision->SetTerrain(m_pTerrain);
-	m_pCollision->SetReserveObjects(pObjectsShader->GetNumberOfObjects());
-	m_pCollision->SetEnemyObjects(pObjectsShader->GetObjects(), pObjectsShader->GetNumberOfObjects());
+	m_pCollision->SetReserveObjects(pObjectsShader->GetNumberOfGunshipObjects(), pObjectsShader->GetNumberOfSuperCobraObjects());
+	m_pCollision->SetEnemyObjects(pObjectsShader->GetObjects(), pObjectsShader->GetNumberOfGunshipObjects(), pObjectsShader->GetNumberOfSuperCobraObjects());
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

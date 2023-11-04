@@ -342,7 +342,8 @@ void CStandardShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 //
 CObjectsShader::CObjectsShader()
 {
-	m_nObjects = 1;
+	m_nGunshipObjects = 10;
+	m_nSuperCobraObjects = 10;
 }
 
 CObjectsShader::~CObjectsShader()
@@ -368,7 +369,6 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 	XMFLOAT3 xmf3Position;
     xmf3Position.x = xmf3Center.x + fRadius * sin(fAngle);
-    //xmf3Position.y = xmf3Center.y - (nColumn * float(nColumnSpace) / 2.0f) + (nColumn * nColumnSpace) + Random();
 	xmf3Position.y = 1000.0f;
     xmf3Position.z = xmf3Center.z + fRadius * cos(fAngle);
 
@@ -377,43 +377,16 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
 {
-	m_ppObjects = new CGameObject*[m_nObjects];
+	m_ppObjects = new CGameObject*[m_nGunshipObjects + m_nSuperCobraObjects];
 
-	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
 	CGameObject* pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
-	//CGameObject* pMissileModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/hellfire.bin", this);
+	CGameObject* pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
 	
-	int nColumnSpace = 5, nColumnSize = 30;           
-    int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
-
-  //  for (int h = 0; h < nFirstPassColumnSize; h++)
-  //  {
-  //      for (int i = 0; i < floor(float(m_nObjects) / float(nColumnSize)); i++)
-  //      {
-		//	if (nObjects % 2)
-		//	{
-		//		m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		//		m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
-		//		m_ppObjects[nObjects]->PrepareOOBB();
-		//		pSuperCobraModel->AddRef();
-		//	}
-		//	else
-		//	{
-		//		m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		//		m_ppObjects[nObjects]->SetChild(pGunshipModel);
-		//		m_ppObjects[nObjects]->PrepareOOBB();
-		//		pGunshipModel->AddRef();
-		//	}
-		//	XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace);
-		//	m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
-		//	m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
-		//	m_ppObjects[nObjects++]->PrepareAnimate();
-		//}
-  //  }
+	// Add Gunship
 	CGameObject* pMissileModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/hellfire.bin", this);
 	int nObjects = 0;
 	std::uniform_int_distribution<int> uid(20, 150);
-	for (int i = 0; i < m_nObjects; ++i)
+	for (int i = 0; i < m_nGunshipObjects; ++i)
 	{
 		m_ppObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pMissileModel, pContext);
 		m_ppObjects[i]->SetChild(pGunshipModel);
@@ -426,30 +399,19 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[nObjects++]->PrepareAnimate();
 	}
 
-   // if (nFirstPassColumnSize != nColumnSize)
-   // {
-   //     for (int i = 0; i < m_nObjects - int(floor(float(m_nObjects) / float(nColumnSize)) * nFirstPassColumnSize); i++)
-   //     {
-			//if (nObjects % 2)
-			//{
-			//	m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			//	m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
-			//	m_ppObjects[nObjects]->PrepareOOBB();
-			//	pSuperCobraModel->AddRef();
-			//}
-			//else
-			//{
-			//	m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			//	m_ppObjects[nObjects]->SetChild(pGunshipModel);
-			//	m_ppObjects[nObjects]->PrepareOOBB();
-			//	pGunshipModel->AddRef();
-			//}
-			//XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace);
-			//m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 850.0f, xmf3RandomPosition.z);
-			//m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
-			//m_ppObjects[nObjects++]->PrepareAnimate();
-   //     }
-   // }
+	// Add SuperCobra
+	for (int i = m_nGunshipObjects; i < m_nGunshipObjects + m_nSuperCobraObjects; ++i)
+	{
+		m_ppObjects[i] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext);
+		m_ppObjects[i]->SetChild(pSuperCobraModel);
+		m_ppObjects[i]->PrepareOOBB();
+		pSuperCobraModel->AddRef();
+
+		XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(2560.0f, 0.0f, 2560.0f), 2560.0f, 0, 0);
+		m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y, xmf3RandomPosition.z);
+		m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+		m_ppObjects[nObjects++]->PrepareAnimate();
+	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -458,14 +420,17 @@ void CObjectsShader::ReleaseObjects()
 {
 	if (m_ppObjects)
 	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Release();
+		for (int j = 0; j < m_nGunshipObjects + m_nSuperCobraObjects; j++)
+		{
+			if (m_ppObjects[j]) m_ppObjects[j]->Release();
+		}
 		delete[] m_ppObjects;
 	}
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	for (int j = 0; j < m_nObjects; j++)
+	for (int j = 0; j < m_nGunshipObjects + m_nSuperCobraObjects; j++)
 	{
 		if (m_ppObjects[j])
 		{
@@ -476,14 +441,20 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 
 void CObjectsShader::ReleaseUploadBuffers()
 {
-	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+	for (int j = 0; j < m_nGunshipObjects + m_nSuperCobraObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->ReleaseUploadBuffers();
+		}
+	}
 }
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState)
 {
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
-	for (int j = 0; j < m_nObjects; j++)
+	for (int j = 0; j < m_nGunshipObjects + m_nSuperCobraObjects; j++)
 	{
 		if (m_ppObjects[j])
 		{
@@ -667,7 +638,7 @@ D3D12_BLEND_DESC CTransparentOjectsShader::CreateBlendState()
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
-	d3dBlendDesc.AlphaToCoverageEnable = TRUE;
+	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
 	d3dBlendDesc.IndependentBlendEnable = FALSE;
 	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
 	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
@@ -1295,9 +1266,9 @@ void CSpriteObjectsShader::BuildPlayerSpriteObjects(ID3D12Device* pd3dDevice, ID
 	}
 }
 
-void CSpriteObjectsShader::BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nObjects)
+void CSpriteObjectsShader::BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nGunshipObjects, int nSuperCobraObjects)
 {
-	m_nEnemyObjects = nObjects * 11;
+	m_nEnemyObjects = nGunshipObjects * 11 + nSuperCobraObjects;
 	m_ppEnemyObjects = new CGameObject* [m_nEnemyObjects];
 
 	CTexture* pSpriteTexture;
@@ -1319,7 +1290,7 @@ void CSpriteObjectsShader::BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3
 	pExplosionSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pExplosionSpriteTexture, 0, 3);
 
-	for (int i = 0; i < nObjects; ++i)
+	for (int i = 0; i < nGunshipObjects; ++i)
 	{
 		if (dynamic_cast<CGunshipObject*>(ppEnemy[i]) == nullptr)
 		{
@@ -1342,6 +1313,18 @@ void CSpriteObjectsShader::BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3
 		}
 	}
 
+	for (int i = nGunshipObjects; i < nGunshipObjects + nSuperCobraObjects; ++i)
+	{
+		CSpriteObject* pSpriteObject;
+		pSpriteObject = new CSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 1, 1, 6, 6);
+		pSpriteObject->SetMaterial(0, pMaterial);
+		pSpriteObject->SetMesh(0, pSpriteMesh1);
+		pSpriteObject->SetAlive(false);
+		pSpriteObject->SetSpeed(0.05f);
+		dynamic_cast<CSuperCobraObject*>(ppEnemy[i])->SetExplosion(pSpriteObject);
+
+		m_ppEnemyObjects[nGunshipObjects * (MAX_NUM_MISSILE + 1) + (i - nGunshipObjects)] = pSpriteObject;
+	}
 }
 
 void CSpriteObjectsShader::ReleaseObjects()
@@ -1599,6 +1582,9 @@ void CUserInterfaceShader::ReleaseObjects()
 void CUserInterfaceShader::AnimateObjects(float fTimeElapsed)
 {
 	m_nHp = dynamic_cast<CHelicopterPlayer*>(m_pPlayer)->GetHp();
+	if (m_nHp <= 0)
+		m_nHp = 0;
+
 	for (int i = 1, j = 1; i <= 10; i = i * 10, --j)
 	{
 		m_fHpU[j] = 50.0f * (m_nHp % (i * 10) / i);
@@ -1606,7 +1592,7 @@ void CUserInterfaceShader::AnimateObjects(float fTimeElapsed)
 			m_fHpU[j] = 0.0f;
 	}
 
-	if (m_nHp < 0)
+	if (m_nHp <= 0)
 		return;
 
 	m_nScore = dynamic_cast<CHelicopterPlayer*>(m_pPlayer)->GetScore();
@@ -1615,19 +1601,12 @@ void CUserInterfaceShader::AnimateObjects(float fTimeElapsed)
 		return;
 	}
 
-	if (m_nScore > 99'999)
-	{
-		//clear
-	}
-
 	for (int i = 1, j = 4; i <= 10'000; i = i * 10, --j)
 	{
 		m_fScoreU[j] = 50.0f * (m_nScore % (i * 10) / i);
 		if (m_fScoreU[j] >= 500.0f)
 			m_fScoreU[j] = 0.0f;
 	}
-
-
 }
 
 void CUserInterfaceShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)

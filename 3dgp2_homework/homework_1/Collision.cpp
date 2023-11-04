@@ -8,11 +8,21 @@ void CCollision::CheckPlayerCollision(float fTimeElapsed)
 {
 	XMFLOAT3 position = m_pPlayer->GetPosition();
 
+	if (position.y > 2500.0f)
+	{
+		XMFLOAT3 xmf3Velocity = dynamic_cast<CPlayer*>(m_pPlayer)->GetVelocity();
+		xmf3Velocity.x = 0.0f;
+		xmf3Velocity.z = 0.0f;
+		XMFLOAT3 xmf3Shift = Vector3::ScalarProduct(xmf3Velocity, -fTimeElapsed, false);
+		m_pPlayer->Move(xmf3Shift, false);
+	}
+
 	if (position.x < 0.0f || position.x > 5120.0f || position.z < 0.0f || position.z > 5120.0f)
 	{
 		m_pPlayer->Collide(nullptr, fTimeElapsed);
 	}
 	dynamic_cast<CPlayer*>(m_pPlayer)->Decelerate(fTimeElapsed);
+
 
 	float fTerrainHeight = m_pTerrain->GetHeight(position.x, position.z);
 	if (fTerrainHeight + 4.0f >= position.y || position.y < 150.0f)
@@ -20,14 +30,6 @@ void CCollision::CheckPlayerCollision(float fTimeElapsed)
 		m_pPlayer->Collide(m_pTerrain);
 	}
 
-	for (auto& enemy : m_pEnemyObjects)
-	{
-		// 플레이어와 적오브젝트의 충돌 검사
-		if (!enemy->GetOOBB().Intersects(m_pPlayer->GetOOBB()))
-		{
-			continue;
-		}
-	}
 }
 
 void CCollision::CheckPlayerBulletCollisions(float fTimeElapsed)
@@ -50,7 +52,8 @@ void CCollision::CheckPlayerBulletCollisions(float fTimeElapsed)
 			{
 				continue;
 			}
-
+			
+			dynamic_cast<CHelicopterPlayer*>(m_pPlayer)->AddScore(10);
 			enemy->SufferDamage(1);
 			m_pPlayerMissiles[i]->Collide();
 		}
@@ -59,6 +62,26 @@ void CCollision::CheckPlayerBulletCollisions(float fTimeElapsed)
 
 void CCollision::CheckEnemyCollisions(float fTimeElapsed)
 {
+	//for (int i = 0; i < m_nGunshipObjects; ++i)
+	//{
+
+	//}
+
+	for (int i = m_nGunshipObjects; i < m_nGunshipObjects + m_nSuperCobraObjects; ++i)
+	{
+		if (!m_pEnemyObjects[i]->GetAlive())
+		{
+			continue;
+		}
+
+		if (!m_pEnemyObjects[i]->GetOOBB().Intersects(m_pPlayer->GetOOBB()))
+		{
+			continue;
+		}
+
+		m_pPlayer->SufferDamage(3);
+		m_pEnemyObjects[i]->Collide(m_pPlayer, fTimeElapsed);		
+	}
 }
 
 void CCollision::CheckEnemyBulletCollisions(float fTimeElapsed)
@@ -118,19 +141,26 @@ void CCollision::SetPlayer(CGameObject* pPlayer)
 	//}
 }
 
-void CCollision::SetReserveObjects(int nNum)
+void CCollision::SetReserveObjects(int nGunshipObjects, int nSuperCobraObjects)
 {
-	m_pEnemyObjects.reserve(nNum);
-	m_pEnemyMissiles.reserve(nNum * MAX_NUM_MISSILE);
-	m_nEnemy = nNum;
+	m_pEnemyObjects.reserve(nGunshipObjects + nSuperCobraObjects);
+	m_pEnemyMissiles.reserve(nGunshipObjects * MAX_NUM_MISSILE);
+	m_nEnemy = nGunshipObjects + nSuperCobraObjects;
 }
 
-void CCollision::SetEnemyObjects(CGameObject** pEnemy, int nNum)
+void CCollision::SetEnemyObjects(CGameObject** pEnemy, int nGunshipObjects, int nSuperCobraObjects)
 {
-	for (int i = 0; i < nNum; ++i)
+	m_nGunshipObjects = nGunshipObjects;
+	m_nSuperCobraObjects = nSuperCobraObjects;
+	for (int i = 0; i < nGunshipObjects; ++i)
 	{
 		m_pEnemyObjects.push_back(pEnemy[i]);
 		SetEnemyMissiles(pEnemy[i]);
+	}
+
+	for (int i = nGunshipObjects; i < nGunshipObjects + nSuperCobraObjects; ++i)
+	{
+		m_pEnemyObjects.push_back(pEnemy[i]);
 	}
 }
 

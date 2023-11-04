@@ -943,8 +943,19 @@ CGameObject *CGameObject::LoadGeometryFromFile(ID3D12Device *pd3dDevice, ID3D12G
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
 
-CSuperCobraObject::CSuperCobraObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(0, 0)
+CSuperCobraObject::CSuperCobraObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) 
+	: CGameObject(0, 0)
 {
+	m_fMaxVelocityXZ = 100.0f;
+	m_fMaxVelocityY = 100.0f;
+	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_fFriction = 300.0f;
+}
+
+CSuperCobraObject::CSuperCobraObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pTarget)
+	:CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature)
+{
+	m_pTarget = (CHelicopterPlayer*)pTarget;
 }
 
 CSuperCobraObject::~CSuperCobraObject()
@@ -965,6 +976,8 @@ void CSuperCobraObject::PrepareAnimate()
 
 void CSuperCobraObject::Animate(float fTimeElapsed)
 {
+	Find(fTimeElapsed);
+
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
@@ -979,14 +992,138 @@ void CSuperCobraObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 
 	SetOOBB();
+
+	if (!m_bAlive)
+	{
+		m_fExplosionTime += fTimeElapsed;
+		if (m_fExplosionTime > 5.0f)
+		{
+			// respone
+			Reset();
+			return;
+		}
+
+		m_xmf3Velocity.y = -100.0f;
+		XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+		Move(xmf3Velocity, false);
+
+		m_pExplosionAnimation->SetAlive(true);
+		XMFLOAT4X4 xmf4x4transform = Matrix4x4::Identity();
+		xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, XMMatrixTranslation(-0.0f, 5.0f, -0.0f));
+		xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, m_xmf4x4Local);
+		m_pExplosionAnimation->SetLocalTransform(xmf4x4transform);
+		//return;
+	}
 }
 
 void CSuperCobraObject::Collide(CGameObject* pCollidedObject, float fTimeElapsed)
 {
+	m_bAlive = false;
+}
+
+void CSuperCobraObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 void CSuperCobraObject::Move(const XMFLOAT3& xmf3Shift, bool bVelocity)
 {
+	if (bVelocity)
+	{
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
+	}
+	else
+	{
+		XMFLOAT3 xmf3Position = GetPosition();
+		SetPosition(Vector3::Add(xmf3Position, xmf3Shift));
+	}
+}
+
+void CSuperCobraObject::Decelerate(float fTimeElapsed)
+{
+	float fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = (m_fFriction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+}
+
+void CSuperCobraObject::Find(float fTimeElapsed)
+{
+	if (!m_bAlive)
+	{
+		return;
+	}
+
+	// 타겟까지의 방향벡터
+	XMFLOAT3 xmf3Target = Vector3::Add(m_pTarget->GetPosition(), GetPosition(), -1);
+
+	XMFLOAT3 xmf3TargetXZ = Vector3::Normalize(xmf3Target);
+	xmf3TargetXZ.y = 0.0f;
+	xmf3TargetXZ = Vector3::Normalize(xmf3TargetXZ);
+
+	XMFLOAT3 xmf3Angle;
+	XMStoreFloat3(&xmf3Angle, XMVector2AngleBetweenNormals(XMLoadFloat3(&GetLook()), XMLoadFloat3(&xmf3TargetXZ)));
+
+	// 현재 객체에서 타겟까지의 각도를 계산
+	float fAngleToTarget = XMConvertToDegrees(xmf3Angle.x);
+	// 회전할 각도를 시간에 비례하여 계산
+	float fMaxRotateAngle = m_fRotateSpeed * fTimeElapsed;
+	// 회전 각도를 최대 회전 속도로 제한
+	float fDegree = min(fAngleToTarget, fMaxRotateAngle);
+
+	if (Vector3::CrossProduct(GetLook(), xmf3TargetXZ).y > 0.0f && fDegree > EPSILON)
+	{
+		Rotate(0.0f, fDegree, 0.0f);
+	}
+	else if (Vector3::CrossProduct(GetLook(), xmf3TargetXZ).y < 0.0f && fDegree > EPSILON)
+	{
+		Rotate(0.0f, -fDegree, 0.0f);
+	}
+
+	xmf3Target = Vector3::Normalize(xmf3Target);
+	XMFLOAT3 xmf3Shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), xmf3Target, 10.0f);
+	Move(xmf3Shift, true);
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = m_fMaxVelocityXZ;
+	if (fLength > m_fMaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	}
+	float fMaxVelocityY = m_fMaxVelocityY;
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+
+	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+	Move(xmf3Velocity, false);
+	Decelerate(fTimeElapsed);
+}
+
+void CSuperCobraObject::SufferDamage(int nDamage)
+{
+	m_nHealthPoint -= nDamage;
+	if (m_nHealthPoint <= 0)
+	{
+		m_bAlive = false;
+	}
+}
+
+void CSuperCobraObject::Reset()
+{
+	m_bAlive = true;
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf4x4Local = Matrix4x4::Identity();
+	m_xmf4x4World = Matrix4x4::Identity();
+	m_nHealthPoint = 1;
+	m_fExplosionTime = 0.0f;
+
+	XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(2560.0f, 0.0f, 2560.0f), 2560.0f, 0, 0);
+	SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y, xmf3RandomPosition.z);
+
+	m_pExplosionAnimation->SetAlive(false);
 }
 
 void CSuperCobraObject::SetOOBB()
@@ -1098,6 +1235,17 @@ void CGunshipObject::Animate(float fTimeElapsed)
 
 	if (!m_bAlive)
 	{
+		m_fExplosionTime += fTimeElapsed;
+		if (m_fExplosionTime > 5.0f)
+		{
+			Reset();
+			return;
+		}
+
+		m_xmf3Velocity.y = -100.0f;
+		XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+		Move(xmf3Velocity, false);
+
 		m_pExplosionAnimation->SetAlive(true);
 		XMFLOAT4X4 xmf4x4transform = Matrix4x4::Identity();
 		xmf4x4transform = Matrix4x4::Multiply(xmf4x4transform, XMMatrixTranslation(-0.0f, 5.0f, -0.0f));
@@ -1178,6 +1326,26 @@ void CGunshipObject::SufferDamage(int nDamage)
 	}
 }
 
+void CGunshipObject::Reset()
+{
+	std::uniform_int_distribution<int> uid(2, 6);
+
+	m_bAlive = true;
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf4x4Local = Matrix4x4::Identity();
+	m_xmf4x4World = Matrix4x4::Identity();
+	m_nHealthPoint = 1;
+	m_fExplosionTime = 0.0f;
+
+	m_fCoolTime = 0.0f;
+	m_fFireCoolTime = float(uid(dre));
+	m_fRange = 50.0f * float(uid(dre));
+	XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(2560.0f, 0.0f, 2560.0f), 2560.0f, 0, 0);
+	SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y, xmf3RandomPosition.z);
+
+	m_pExplosionAnimation->SetAlive(false);
+}
+
 void CGunshipObject::Find(float fTimeElapsed)
 {
 	if (!m_bAlive)
@@ -1199,8 +1367,6 @@ void CGunshipObject::Find(float fTimeElapsed)
 	float fMaxRotateAngle = m_fRotateSpeed * fTimeElapsed;
 	// 회전 각도를 최대 회전 속도로 제한
 	float fDegree = min(fAngleToTarget, fMaxRotateAngle);
-
-
 
 	if (Vector3::CrossProduct(GetLook(), xmf3TargetXZ).y > 0.0f && fDegree > EPSILON)
 	{
@@ -1227,7 +1393,7 @@ void CGunshipObject::Find(float fTimeElapsed)
 		XMFLOAT3 xmf3Shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), xmf3TargetY, 10.0f);
 		Move(xmf3Shift, true);
 	}
-	else if (m_xmf3Velocity.y * m_xmf3Velocity.y < 100.0f && xmf3Target.y * xmf3Target.y > 4.0f)
+	else if (m_xmf3Velocity.y * m_xmf3Velocity.y < 100.0f && xmf3Target.y * xmf3Target.y > 1.0f)
 	{
 		XMFLOAT3 xmf3Shift = Vector3::Add(XMFLOAT3(0.0f, 0.0f, 0.0f), xmf3TargetY, 5.0f * fTimeElapsed);
 		Move(xmf3Shift, false);
@@ -1250,26 +1416,6 @@ void CGunshipObject::Find(float fTimeElapsed)
 	Decelerate(fTimeElapsed);
 }
 
-void CGunshipObject::Chase(float fTimeElapsed)
-{
-
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
-	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	float fMaxVelocityXZ = m_fMaxVelocityXZ;
-	if (fLength > m_fMaxVelocityXZ)
-	{
-		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
-		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
-	}
-	float fMaxVelocityY = m_fMaxVelocityY;
-	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
-	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
-
-	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
-	Move(xmf3Velocity, false);
-	//Decelerate(fTimeElapsed);
-}
-
 void CGunshipObject::SetOOBB()
 {
 	m_pMainBodyFrame->GetMesh(0)->GetOOBB().Transform(m_OOBB, XMLoadFloat4x4(&m_xmf4x4Local));
@@ -1285,8 +1431,6 @@ CMi24Object::CMi24Object(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd
 CMi24Object::~CMi24Object()
 {
 }
-
-
 
 void CMi24Object::PrepareAnimate()
 {
@@ -1379,13 +1523,12 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		}
 	}
 
-	//CTexturedRectMesh* terrainFloorMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10000.0f, 0.0f, 10000.0f, 1000.0f, 1000.0f);
 	pHeightMapGridMesh = new CHeightMapGridMesh(pd3dDevice, pd3dCommandList, 0, 0, 2, 2, xmf3Scale);
 	SetMesh(0, pHeightMapGridMesh);
 	
 	CTexture* pTerrainTexture = new CTexture(4, RESOURCE_TEXTURE2D, 0, 1);
 
-	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/1024x1024_Dirt_2_Diffuse.dds", RESOURCE_TEXTURE2D, 0);
+	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/512x512_Dirt_2_Diffuse.dds", RESOURCE_TEXTURE2D, 0);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/3DH FTT Dirt_001 512.dds", RESOURCE_TEXTURE2D, 1);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Base_Texture.dds", RESOURCE_TEXTURE2D, 2);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/HeightMap(Alpha).dds", RESOURCE_TEXTURE2D, 3);

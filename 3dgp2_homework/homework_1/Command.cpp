@@ -75,14 +75,8 @@ void CFireCommand::execute(CGameObject& gameObject)
 		if (player->GetCoolTime() > 0.0f)
 			return;
 
-		player->SetCoolTime(1.0f);
+		player->SetCoolTime(0.5f);
 		player->Fire();
-
-		char buf[256];
-
-		char err[] = "KeyDown Fire";
-		sprintf_s(buf, sizeof(buf), "Debug: %s\n", err);
-		OutputDebugStringA(buf);
 	}
 }
 

@@ -94,7 +94,9 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
+XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn, int nColumnSpace);
+
 class CObjectsShader : public CStandardShader
 {
 public:
@@ -109,12 +111,15 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState=0);
 
-	CGameObject** GetObjects() const { return m_ppObjects; };
-	int GetNumberOfObjects() const { return(m_nObjects); }
+	CGameObject** GetObjects() const { return m_ppObjects; }
+	int GetNumberOfObjects() const { return(m_nGunshipObjects + m_nSuperCobraObjects); }
+	int GetNumberOfGunshipObjects() const { return m_nGunshipObjects; }
+	int GetNumberOfSuperCobraObjects() const { return m_nSuperCobraObjects; }
 
 protected:
 	CGameObject**	m_ppObjects = 0;
-	int				m_nObjects = 0;
+	int				m_nGunshipObjects = 0;
+	int				m_nSuperCobraObjects = 0;
 
 };
 
@@ -248,7 +253,7 @@ public:
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
 	void BuildPlayerSpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = nullptr);
-	void BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nObjects);
+	void BuildEnemySpriteObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nGunshipObjects, int nSuperCobraObjects);
 	virtual void ReleaseObjects();
 
 	virtual void AnimateObjects(float fTimeElapsed);

@@ -102,6 +102,7 @@ public:
 
 	void Fire();
 	virtual void SufferDamage(int nDamage) override;
+	void AddScore(int nScore) { m_nScore += nScore; };
 
 	// interface
 	virtual void SetOOBB() override;
@@ -132,7 +133,7 @@ private:
 	// 스코어 작성 필요
 	float m_fAliveTime = 0.0f;
 	int	  m_nScore = 0;
-	int   m_nHealthPoint = 50;
+	int   m_nHealthPoint = 15;
 	float m_fCoolTime = 0.0f;
 };
 

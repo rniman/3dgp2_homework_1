@@ -277,6 +277,7 @@ class CSuperCobraObject : public CGameObject
 {
 public:
 	CSuperCobraObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	CSuperCobraObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void* pTarget);
 	virtual ~CSuperCobraObject();
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) {};
@@ -285,22 +286,25 @@ public:
 	virtual void PrepareAnimate() override;
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Collide(CGameObject* pCollidedObject = nullptr, float fTimeElapsed = 0.0f) override;
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override {};
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = nullptr) override;;
 
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false) override;
-	void Fire();
-	
+	void Decelerate(float fTimeElapsed);
+
+	void Find(float fTimeElapsed);
+	virtual void SufferDamage(int nDamage) override;;
+
+	void Reset();
 	// interface
+	void SetTarget(CGameObject* pTarget) { m_pTarget = pTarget; };
+
 	virtual void SetOOBB() override;
-
-	float GetCoolTime() const { return m_fCoolTime; };
-	void SetCoolTime(float fCoolTime) { m_fCoolTime = fCoolTime; };
-
-	virtual class CMissile* GetMissile(int nIndex) { return m_arraypMissile[nIndex]; };
+	void SetExplosion(CGameObject* pExplosion) { m_pExplosionAnimation = pExplosion; };
 private:
 	CGameObject* m_pMainRotorFrame = nullptr;
 	CGameObject* m_pTailRotorFrame = nullptr;
 	CGameObject* m_pMainBodyFrame = nullptr;
+	CGameObject* m_pExplosionAnimation;
 
 	XMFLOAT3	m_xmf3Velocity;
 	XMFLOAT3    m_xmf3Gravity;
@@ -310,10 +314,9 @@ private:
 
 	CGameObject* m_pTarget = nullptr;
 
-	CGameObject* m_pMissileObject = nullptr;
-	std::array<CMissile*, MAX_NUM_MISSILE> m_arraypMissile;
-
-	float m_fCoolTime = 0.0f;
+	int   m_nHealthPoint = 1;
+	float m_fRotateSpeed = 180.0f;
+	float m_fExplosionTime = 0.0f;
 };
 
 class CGunshipObject : public CGameObject
@@ -336,9 +339,9 @@ public:
 
 	void Fire();
 	void Find(float fTimeElapsed);
-	void Chase(float fTimeElapsed);
 	virtual void SufferDamage(int nDamage) override;
 
+	void Reset();
 	// interface
 	virtual void SetOOBB() override;
 	
@@ -374,6 +377,7 @@ private:
 	float m_fCoolTime = 0.0f;
 	float m_fRotateSpeed = 180.0f;
 	float m_fRange = 0.0f;
+	float m_fExplosionTime = 0.0f;
 };
 
 class CMi24Object : public CGameObject

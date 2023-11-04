@@ -305,7 +305,7 @@ void CHelicopterPlayer::Animate(float fTimeElapsed)
 	if (m_bAlive)
 	{
 		m_fAliveTime += fTimeElapsed;
-		if (m_fAliveTime > 0.001f)
+		if (m_fAliveTime > 1.0f)
 		{
 			m_nScore += 1;
 			m_fAliveTime = 0.0f;
@@ -397,7 +397,13 @@ void CHelicopterPlayer::Collide(CGameObject* pCollidedObject, float fTimeElapsed
 
 	if (pCollidedObject == nullptr)	// 맵 밖으로 나간 것
 	{
-		if((m_xmf3Position.x > 5120.0f && m_xmf3Look.z < 0.0f) || (m_xmf3Position.x < 0.0f && m_xmf3Look.z >= 0.0f))
+		// 후진 중이었으면
+		if (Vector3::DotProduct(m_xmf3Look, m_xmf3Velocity) < 0.0f)
+		{
+			XMFLOAT3 xmf3Shift = Vector3::ScalarProduct(m_xmf3Velocity, -fTimeElapsed, false);
+			Move(xmf3Shift, false);
+		}
+		else if((m_xmf3Position.x > 5120.0f && m_xmf3Look.z < 0.0f) || (m_xmf3Position.x < 0.0f && m_xmf3Look.z >= 0.0f))
 		{
 			// 시계 회전
 			XMMATRIX rotate = XMMatrixRotationY(XMConvertToRadians(45.0f));
@@ -405,7 +411,7 @@ void CHelicopterPlayer::Collide(CGameObject* pCollidedObject, float fTimeElapsed
 			XMStoreFloat4x4(&xmf4x4Rotate, rotate);
 			Rotate(0.0f, 45.0f, 0.0f);
 			m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmf4x4Rotate);
-			Update(fTimeElapsed);
+			Move(m_xmf3Look, false);
 		}
 		else if ((m_xmf3Position.x > 5120.0f && m_xmf3Look.z >= 0.0f) || (m_xmf3Position.x < 0.0f && m_xmf3Look.z < 0.0f))
 		{
@@ -415,7 +421,7 @@ void CHelicopterPlayer::Collide(CGameObject* pCollidedObject, float fTimeElapsed
 			XMStoreFloat4x4(&xmf4x4Rotate, rotate);
 			Rotate(0.0f, -45.0f, 0.0f);
 			m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmf4x4Rotate);
-			Update(fTimeElapsed);
+			Move(m_xmf3Look, false);
 		}
 		else if ((m_xmf3Position.z > 5120.0f && m_xmf3Look.x >= 0.0f) || (m_xmf3Position.z < 0.0f && m_xmf3Look.x < 0.0f))
 		{
@@ -425,7 +431,7 @@ void CHelicopterPlayer::Collide(CGameObject* pCollidedObject, float fTimeElapsed
 			XMStoreFloat4x4(&xmf4x4Rotate, rotate);
 			Rotate(0.0f, 45.0f, 0.0f);
 			m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmf4x4Rotate);
-			Update(fTimeElapsed);
+			Move(m_xmf3Look, false);
 		}
 		else if ((m_xmf3Position.z > 5120.0f && m_xmf3Look.x < 0.0f) || (m_xmf3Position.z < 0.0f && m_xmf3Look.x >= 0.0f))
 		{
@@ -435,7 +441,7 @@ void CHelicopterPlayer::Collide(CGameObject* pCollidedObject, float fTimeElapsed
 			XMStoreFloat4x4(&xmf4x4Rotate, rotate);
 			Rotate(0.0f, -45.0f, 0.0f);
 			m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmf4x4Rotate);
-			Update(fTimeElapsed);
+			Move(m_xmf3Look, false);
 		}
 	}
 
@@ -499,8 +505,8 @@ void CHelicopterPlayer::Fire()
 		missile->SetLifeTime();
 
 		XMFLOAT3 missilePos = GetPosition();
-		missilePos.x = 0.9970461f;
-		missilePos.y = -3.221008f;
+		missilePos.x = 0.0f;
+		missilePos.y = 0.0f;
 		missilePos.z = 10.85722f;
 
 		XMFLOAT4X4 matrix = Matrix4x4::Identity();

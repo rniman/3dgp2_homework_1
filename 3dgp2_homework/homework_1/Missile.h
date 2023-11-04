@@ -26,6 +26,6 @@ private:
 
 	float m_fExplosionTime = 0.0f;
 	float m_fLifeTime = -1.0f;
-	float m_fSpeed = 10.0f;
+	float m_fSpeed = 30.0f;
 };
 
